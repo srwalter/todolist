@@ -10,20 +10,28 @@
         <script>
 var database = "todo";
 
-async function listTodos() {
+async function listTasks(proc, show_button = false) {
     const links = {
         'Details': ['displayTodo', true],
         'Edit': 'modifyTodo',
     };
-    await callProcedureFull({proc_name: 'listTodos', links: links, activate: true, show_button: false});
+    await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button});
 }
 
+async function listTodos() {
+    listTasks('listTodos');
+    activateProcedure('listTodos');
+}
 async function listTasksInState() {
-    const links = {
-        'Details': ['displayTodo', true],
-        'Edit': 'modifyTodo',
-    };
-    await callProcedureFull({proc_name: 'listTasksInState', links: links, activate: true});
+    listTasks('listTasksInState', true);
+}
+async function listCompletedTasks() {
+    listTasks('listCompletedTasks');
+    activateProcedure('listCompletedTasks');
+}
+async function listScheduledTasks() {
+    listTasks('listScheduledTasks');
+    activateProcedure('listScheduledTasks');
 }
 
 async function modifyTodo() {
@@ -41,8 +49,8 @@ async function onLoad() {
     if (q['proc']) {
         if (q['proc'] == 'listTodos') {
             await listTodos();
-        } else if (q['proc'] == 'liskTasksInState') {
-            await liskTasksInState();
+        } else if (q['proc'] == 'listTasksInState') {
+            await listTasksInState();
         } else if (q['proc'] == 'modifyTodo') {
             await modifyTodo();
         } else {
@@ -68,6 +76,8 @@ async function onLoad() {
           </button>
           <ul class="dropdown-menu">
               <li><a href="?proc=createTodo">Create Todo</a></li>
+            <li><a href="?proc=listScheduledTasks&autosubmit=listScheduledTasks">List Scheduled</a></li>
+            <li><a href="?proc=listCompletedTasks&autosubmit=listCompletedTasks">Show Completed</a></li>
             <li><a href="?proc=listTodos">List Todos</a></li>
           </ul>
         </div>
