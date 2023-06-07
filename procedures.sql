@@ -59,8 +59,30 @@ END //
 DROP PROCEDURE IF EXISTS quickEntry //
 CREATE PROCEDURE quickEntry (title VARCHAR(512), OUT todoID INT)
 BEGIN
-    INSERT INTO todo (sort, title)
-        VALUES (0, title);
+    INSERT INTO todo (sort, focus, title)
+        VALUES (0, 0, title);
     SET todoID = LAST_INSERT_ID();
     UPDATE todo SET sort = todoID * 10 WHERE id = todoID;
 END //
+
+DROP PROCEDURE IF EXISTS listTasksInState //
+CREATE PROCEDURE listTasksInState (state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'))
+BEGIN
+    SELECT id AS _id, title, due
+        FROM todo WHERE todo.state = state AND todo.completed IS NULL ORDER BY sort;
+END //
+
+DROP PROCEDURE IF EXISTS listCompletedTasks //
+CREATE PROCEDURE listCompletedTasks ()
+BEGIN
+    SELECT id AS _id, title, completed
+        FROM todo WHERE todo.completed IS NOT NULL ORDER BY sort;
+END //
+
+DROP PROCEDURE IF EXISTS listScheduledTasks //
+CREATE PROCEDURE listScheduledTasks ()
+BEGIN
+    SELECT id AS _id, title, scheduled, recurringDays
+        FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
+END //
+

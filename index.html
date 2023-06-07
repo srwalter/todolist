@@ -18,6 +18,14 @@ async function listTodos() {
     await callProcedureFull({proc_name: 'listTodos', links: links, activate: true, show_button: false});
 }
 
+async function listTasksInState() {
+    const links = {
+        'Details': ['displayTodo', true],
+        'Edit': 'modifyTodo',
+    };
+    await callProcedureFull({proc_name: 'listTasksInState', links: links, activate: true});
+}
+
 async function modifyTodo() {
     await callProcedureOutput({proc_name: 'showTodo', prev_proc: 'modifyTodo', outputs: ['modifyTodo'], show_button: false, show_header: false});
     await callProcedureFull({proc_name: 'modifyTodo', show_header: true});
@@ -33,6 +41,8 @@ async function onLoad() {
     if (q['proc']) {
         if (q['proc'] == 'listTodos') {
             await listTodos();
+        } else if (q['proc'] == 'liskTasksInState') {
+            await liskTasksInState();
         } else if (q['proc'] == 'modifyTodo') {
             await modifyTodo();
         } else {
@@ -41,7 +51,7 @@ async function onLoad() {
         prefillForms();
     } else {
         await callProcedure('quickEntry');
-        await listTodos();
+        await listTasksInState();
     }
 }
         </script>
