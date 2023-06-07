@@ -14,16 +14,22 @@ END //
 DROP PROCEDURE IF EXISTS listTodos //
 CREATE PROCEDURE listTodos ()
 BEGIN
-    SELECT * FROM todo;
+    SELECT id AS _id, complete, title, state, due
+        FROM todo ORDER BY sort;
+END //
+
+DROP PROCEDURE IF EXISTS showTodo //
+CREATE PROCEDURE showTodo (id INT)
+BEGIN
+    SELECT * FROM todo WHERE todo.id = id;
 END //
 
 DROP PROCEDURE IF EXISTS modifyTodo //
-CREATE PROCEDURE modifyTodo (id INT, sort INT, title VARCHAR(512), complete tinyint(1), focus tinyint(1),
+CREATE PROCEDURE modifyTodo (_id INT, title VARCHAR(512), complete tinyint(1), focus tinyint(1),
     state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'),
     due DATE, scheduled DATE, recurringDays INT, details TEXT, OUT result VARCHAR(255))
 BEGIN
     UPDATE todo AS t SET
-        t.sort = sort,
         t.title = title,
         t.complete = complete,
         t.focus = focus,
@@ -32,6 +38,6 @@ BEGIN
         t.scheduled = scheduled,
         t.recurringDays = recurringDays,
         t.details = details
-        WHERE t.id = id;
+        WHERE t.id = _id;
     SET result = "Success";
 END //

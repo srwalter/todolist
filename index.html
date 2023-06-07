@@ -12,9 +12,17 @@ var database = "todo";
 
 async function listTodos() {
     const links = {
+        'Details': ['showTodo', true],
         'Edit': 'modifyTodo',
     };
     await callProcedureFull({proc_name: 'listTodos', links: links, activate: true});
+}
+
+async function modifyTodo() {
+    await callProcedureOutput({proc_name: 'showTodo', prev_proc: 'modifyTodo', outputs: ['modifyTodo'], show_button: false, show_header: false});
+    await callProcedureFull({proc_name: 'modifyTodo', show_header: true});
+    prefillForms();
+    activateProcedure('showTodo');
 }
 
 async function onLoad() {
@@ -25,6 +33,8 @@ async function onLoad() {
     if (q['proc']) {
         if (q['proc'] == 'listTodos') {
             await listTodos();
+        } else if (q['proc'] == 'modifyTodo') {
+            await modifyTodo();
         } else {
             await callProcedure(q['proc']);
         }
