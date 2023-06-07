@@ -10,13 +10,24 @@
         <script>
 var database = "todo";
 
+async function listTodos() {
+    const links = {
+        'Edit': 'modifyTodo',
+    };
+    await callProcedureFull({proc_name: 'listTodos', links: links, activate: true});
+}
+
 async function onLoad() {
     if (!await checkLogin()) {
         return;
     }
     var q = parseQueryString(window.location.search);
     if (q['proc']) {
-        await callProcedure(q['proc']);
+        if (q['proc'] == 'listTodos') {
+            await listTodos();
+        } else {
+            await callProcedure(q['proc']);
+        }
         prefillForms();
     } else {
         await allRoutines();
