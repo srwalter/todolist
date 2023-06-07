@@ -24,6 +24,20 @@ BEGIN
     SELECT * FROM todo WHERE todo.id = id;
 END //
 
+DROP PROCEDURE IF EXISTS displayTodo //
+CREATE PROCEDURE displayTodo (_id INT)
+BEGIN
+    SELECT title FROM todo WHERE todo.id = _id;
+    SELECT complete FROM todo WHERE todo.id = _id;
+    SELECT focus FROM todo WHERE todo.id = _id;
+    SELECT state FROM todo WHERE todo.id = _id;
+    SELECT due FROM todo WHERE todo.id = _id;
+    SELECT scheduled, recurringDays FROM todo WHERE todo.id = _id;
+    SELECT scheduled, recurringDays FROM todo WHERE todo.id = _id;
+    SELECT project FROM todo WHERE todo.id = _id;
+    SELECT details FROM todo WHERE todo.id = _id;
+END //
+
 DROP PROCEDURE IF EXISTS modifyTodo //
 CREATE PROCEDURE modifyTodo (_id INT, title VARCHAR(512), complete tinyint(1), focus tinyint(1),
     state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'),

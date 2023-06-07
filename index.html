@@ -12,7 +12,7 @@ var database = "todo";
 
 async function listTodos() {
     const links = {
-        'Details': ['showTodo', true],
+        'Details': ['displayTodo', true],
         'Edit': 'modifyTodo',
     };
     await callProcedureFull({proc_name: 'listTodos', links: links, activate: true});
