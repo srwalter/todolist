@@ -10,3 +10,9 @@ BEGIN
     SET todoID = LAST_INSERT_ID();
     UPDATE todo SET sort = todoID * 10 WHERE id = todoID;
 END //
+
+DROP PROCEDURE IF EXISTS listTodos //
+CREATE PROCEDURE listTodos ()
+BEGIN
+    SELECT * FROM todo;
+END //
