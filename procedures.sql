@@ -55,3 +55,12 @@ BEGIN
         WHERE t.id = _id;
     SET result = "Success";
 END //
+
+DROP PROCEDURE IF EXISTS quickEntry //
+CREATE PROCEDURE quickEntry (title VARCHAR(512), OUT todoID INT)
+BEGIN
+    INSERT INTO todo (sort, complete, title)
+        VALUES (0, 0, title);
+    SET todoID = LAST_INSERT_ID();
+    UPDATE todo SET sort = todoID * 10 WHERE id = todoID;
+END //
