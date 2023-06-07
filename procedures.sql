@@ -93,3 +93,15 @@ BEGIN
         FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
 END //
 
+DROP PROCEDURE IF EXISTS markCompleted //
+CREATE PROCEDURE markCompleted (id INT)
+BEGIN
+    UPDATE todo SET completed = CURDATE() WHERE todo.id = id;
+END //
+
+DROP PROCEDURE IF EXISTS toggleFocus //
+CREATE PROCEDURE toggleFocus (id INT)
+BEGIN
+    UPDATE todo SET focus = !focus WHERE todo.id = id;
+END //
+
