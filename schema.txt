@@ -2,7 +2,7 @@ CREATE TABLE todo (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sort INT NOT NULL,
     title VARCHAR(512) NOT NULL,
-    complete tinyint(1) NOT NULL,
+    completed DATE,
     focus tinyint(1) NOT NULL,
     state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'),
     due DATE,
