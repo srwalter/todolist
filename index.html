@@ -15,6 +15,7 @@ async function listTasks(proc, show_button = false) {
         'Details': ['displayTodo', true],
         'Edit': 'modifyTodo',
     };
+    await callProcedureFull({proc_name: 'listInboxTasks', links: links, activate: true, show_button: false, show_header: true});
     await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button});
 }
 

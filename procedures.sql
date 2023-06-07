@@ -72,6 +72,13 @@ BEGIN
         FROM todo WHERE todo.state = state AND todo.completed IS NULL ORDER BY sort;
 END //
 
+DROP PROCEDURE IF EXISTS listInboxTasks //
+CREATE PROCEDURE listInboxTasks ()
+BEGIN
+    SELECT id AS _id, title
+        FROM todo WHERE todo.state IS NULL AND todo.scheduled IS NULL ORDER BY sort;
+END //
+
 DROP PROCEDURE IF EXISTS listCompletedTasks //
 CREATE PROCEDURE listCompletedTasks ()
 BEGIN
