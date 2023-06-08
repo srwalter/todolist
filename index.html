@@ -23,8 +23,8 @@ function reorderTasks(proc) {
 
     let lastval = 0;
     for (const r of rows) {
-        const id = parseInt(r.querySelector(':nth-child(1)').textContent);
-        let sort = parseInt(r.querySelector(':nth-child(2)').textContent);
+        const id = parseInt(r.querySelector(':nth-child(2)').textContent);
+        let sort = parseInt(r.querySelector(':nth-child(3)').textContent);
 
         if (sort < lastval) {
             sort = lastval+1;
@@ -43,10 +43,31 @@ async function listTasks(proc, show_button = false) {
     await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button, show_header: true, after_results:
     () => {
         $(`#results_${proc} tbody`).sortable({
+            handle: ".handle",
+            axis: 'y',
             stop: function(event, ui) {
                 reorderTasks(proc);
             }
         }).disableSelection();
+    }, format_row: (row, first, column_names) => {
+        var tr = document.createElement('tr');
+
+        const td = document.createElement('td');
+        tr.appendChild(td);
+        if (!first) {
+            td.setAttribute('class', 'handle');
+            td.setAttribute('style', 'cursor: move; width: 0px');
+            td.textContent = '::';
+        }
+
+        for (let i=0; i < row.length; i++) {
+            const cell = row[i];
+            format_cell(tr, cell, false, {}, first, column_names[i]);
+        }
+
+        format_links(tr, 'index.html', links, row, first, column_names);
+
+        return tr;
     }});
 }
 
