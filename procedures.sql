@@ -79,6 +79,13 @@ BEGIN
         FROM todo WHERE todo.state IS NULL AND todo.scheduled IS NULL ORDER BY sort;
 END //
 
+DROP PROCEDURE IF EXISTS listFocusTasks //
+CREATE PROCEDURE listFocusTasks ()
+BEGIN
+    SELECT id AS _id, title, due
+        FROM todo WHERE todo.focus = 1 AND completed IS NULL ORDER BY sort;
+END //
+
 DROP PROCEDURE IF EXISTS listCompletedTasks //
 CREATE PROCEDURE listCompletedTasks ()
 BEGIN
@@ -90,7 +97,7 @@ DROP PROCEDURE IF EXISTS listScheduledTasks //
 CREATE PROCEDURE listScheduledTasks ()
 BEGIN
     SELECT id AS _id, title, scheduled, recurringDays
-        FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
+        FROM todo WHERE todo.scheduled IS NOT NULL AND completed IS NULL ORDER BY sort;
 END //
 
 DROP PROCEDURE IF EXISTS markCompleted //
