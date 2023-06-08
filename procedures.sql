@@ -107,6 +107,14 @@ DROP PROCEDURE IF EXISTS listFocusTasks //
 CREATE PROCEDURE listFocusTasks ()
 BEGIN
     UPDATE todo SET focus = 1 WHERE completed IS NULL AND isDueNow(due);
+
+    START TRANSACTION;
+    UPDATE todo SET focus = 1 WHERE completed IS NULL AND scheduled <= CURDATE();
+    UPDATE todo SET scheduled = NULL WHERE scheduled <= CURDATE() AND recurringDays IS NULL;
+    UPDATE todo SET completed = NULL, scheduled = DATE_ADD(scheduled, INTERVAL recurringDays DAY)
+        WHERE scheduled <= CURDATE() AND recurringDays IS NOT NULL;
+    COMMIT;
+
     SELECT id AS _id, sort AS _sort, isDueNow(due) AS _dueNow, title, due
         FROM todo WHERE todo.focus = 1 AND completed IS NULL ORDER BY sort;
 END //
