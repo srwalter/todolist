@@ -38,11 +38,27 @@ BEGIN
     SELECT details FROM todo WHERE todo.id = _id;
 END //
 
+DROP PROCEDURE IF EXISTS listProjects //
+CREATE PROCEDURE listProjects ()
+BEGIN
+    SELECT DISTINCT project, project FROM todo;
+END //
+
 DROP PROCEDURE IF EXISTS modifyTodo //
 CREATE PROCEDURE modifyTodo (_id INT, title VARCHAR(512), completed DATE, focus tinyint(1),
     state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'),
-    due DATE, scheduled DATE, recurringDays INT, details TEXT, OUT result VARCHAR(255))
+    due DATE, scheduled DATE, recurringDays INT,
+    newProjectName VARCHAR(255), listProjects_project VARCHAR(255),
+    details TEXT, OUT result VARCHAR(255))
 BEGIN
+    DECLARE grp VARCHAR(255);
+
+    IF (newProjectName IS NOT NULL) THEN
+        SET grp = newProjectName;
+    ELSE
+        SET grp = listProjects_project;
+    END IF;
+
     UPDATE todo AS t SET
         t.title = title,
         t.completed = completed,
@@ -51,6 +67,7 @@ BEGIN
         t.due = due,
         t.scheduled = scheduled,
         t.recurringDays = recurringDays,
+        t.project = grp,
         t.details = details
         WHERE t.id = _id;
     SET result = "Success";
@@ -97,7 +114,7 @@ DROP PROCEDURE IF EXISTS listScheduledTasks //
 CREATE PROCEDURE listScheduledTasks ()
 BEGIN
     SELECT id AS _id, title, scheduled, recurringDays
-        FROM todo WHERE todo.scheduled IS NOT NULL AND completed IS NULL ORDER BY sort;
+        FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
 END //
 
 DROP PROCEDURE IF EXISTS markCompleted //
