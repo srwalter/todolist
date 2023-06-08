@@ -10,6 +10,13 @@
         <script>
 var database = "todo";
 
+async function listProjects() {
+    const links = {
+        'Show': 'listTasksForProject',
+    };
+    await callProcedureFull({proc_name: 'listProjects', links: links, activate: true, show_button: false, show_header: true});
+}
+
 async function listTasks(proc, show_button = false) {
     const links = {
         'Details': ['displayTodo', true],
@@ -18,23 +25,26 @@ async function listTasks(proc, show_button = false) {
     await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button, show_header: true});
 }
 
+async function listTasksForProject() {
+    await listTasks('listTasksForProject', true);
+}
 async function listFocusTasks() {
-    listTasks('listFocusTasks');
+    await listTasks('listFocusTasks');
     activateProcedure('listFocusTasks');
 }
 async function listTodos() {
-    listTasks('listTodos');
+    await listTasks('listTodos');
     activateProcedure('listTodos');
 }
 async function listTasksInState() {
-    listTasks('listTasksInState', true);
+    await listTasks('listTasksInState', true);
 }
 async function listCompletedTasks() {
-    listTasks('listCompletedTasks');
+    await listTasks('listCompletedTasks');
     activateProcedure('listCompletedTasks');
 }
 async function listScheduledTasks() {
-    listTasks('listScheduledTasks');
+    await listTasks('listScheduledTasks');
     activateProcedure('listScheduledTasks');
 }
 
@@ -61,6 +71,10 @@ async function onLoad() {
             await listTodos();
         } else if (q['proc'] == 'listTasksInState') {
             await listTasksInState();
+        } else if (q['proc'] == 'listTasksForProject') {
+            await listTasksForProject();
+        } else if (q['proc'] == 'listProjects') {
+            await listProjects();
         } else if (q['proc'] == 'displayTodo') {
             await displayTodo();
         } else if (q['proc'] == 'modifyTodo') {
@@ -89,7 +103,8 @@ async function onLoad() {
             To-Do <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-              <li><a href="?proc=createTodo">Create Todo</a></li>
+            <li><a href="?proc=createTodo">Create Todo</a></li>
+            <li><a href="?proc=listProjects">List Projects</a></li>
             <li><a href="?proc=listScheduledTasks&autosubmit=listScheduledTasks">List Scheduled</a></li>
             <li><a href="?proc=listCompletedTasks&autosubmit=listCompletedTasks">Show Completed</a></li>
             <li><a href="?proc=listTodos">List Todos</a></li>

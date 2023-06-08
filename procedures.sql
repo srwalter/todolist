@@ -41,7 +41,7 @@ END //
 DROP PROCEDURE IF EXISTS listProjects //
 CREATE PROCEDURE listProjects ()
 BEGIN
-    SELECT DISTINCT project, project FROM todo;
+    SELECT DISTINCT project, project AS _project FROM todo;
 END //
 
 DROP PROCEDURE IF EXISTS modifyTodo //
@@ -85,8 +85,8 @@ END //
 DROP PROCEDURE IF EXISTS listTasksInState //
 CREATE PROCEDURE listTasksInState (state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'))
 BEGIN
-    SELECT id AS _id, title, due
-        FROM todo WHERE todo.state = state AND todo.completed IS NULL ORDER BY sort;
+    SELECT id AS _id, title, due, project
+        FROM todo WHERE todo.state = state AND todo.completed IS NULL ORDER BY project, sort;
 END //
 
 DROP PROCEDURE IF EXISTS listInboxTasks //
@@ -115,6 +115,13 @@ CREATE PROCEDURE listScheduledTasks ()
 BEGIN
     SELECT id AS _id, title, scheduled, recurringDays
         FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
+END //
+
+DROP PROCEDURE IF EXISTS listTasksForProject //
+CREATE PROCEDURE listTasksForProject (listProjects_project VARCHAR(255))
+BEGIN
+    SELECT id AS _id, title, due
+        FROM todo WHERE todo.project = listProjects_project ORDER BY state, sort;
 END //
 
 DROP PROCEDURE IF EXISTS markCompleted //
