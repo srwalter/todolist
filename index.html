@@ -102,6 +102,13 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
 }
 
 async function listTasksForProject() {
+    const values = parseQueryString(window.location.search);
+    const project = values['listTasksForProject_project'];
+    let a = document.createElement('a');
+    const div = document.querySelector('#wheresthebeef');
+    div.appendChild(a);
+    a.textContent = 'Add Task to Project ';
+    a.setAttribute('href', '?proc=addTaskToProject&addTaskToProject_project='+project);
     await listTasks('listTasksForProject', {show_button: true});
 }
 async function listFocusTasks() {

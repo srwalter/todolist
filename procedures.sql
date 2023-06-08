@@ -140,6 +140,15 @@ BEGIN
         FROM todo WHERE todo.project = listProjects_project ORDER BY state, sort;
 END //
 
+DROP PROCEDURE IF EXISTS addTaskToProject //
+CREATE PROCEDURE addTaskToProject (listProjects_project VARCHAR(255), title VARCHAR(512), due DATE, details TEXT, OUT todoID INT)
+BEGIN
+    INSERT INTO todo (sort, title, focus, state, due, details, project)
+        VALUES (0, title, 0, 'Next', due, details, listProjects_project);
+    SET todoID = LAST_INSERT_ID();
+    UPDATE todo SET sort = todoID * 10 WHERE id = todoID;
+END //
+
 DROP PROCEDURE IF EXISTS markCompleted //
 CREATE PROCEDURE markCompleted (id INT)
 BEGIN
