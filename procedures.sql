@@ -130,6 +130,12 @@ BEGIN
     UPDATE todo SET completed = CURDATE() WHERE todo.id = id;
 END //
 
+DROP PROCEDURE IF EXISTS unmarkCompleted //
+CREATE PROCEDURE unmarkCompleted (id INT)
+BEGIN
+    UPDATE todo SET completed = NULL WHERE todo.id = id;
+END //
+
 DROP PROCEDURE IF EXISTS toggleFocus //
 CREATE PROCEDURE toggleFocus (id INT)
 BEGIN
