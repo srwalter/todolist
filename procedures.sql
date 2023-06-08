@@ -85,14 +85,14 @@ END //
 DROP PROCEDURE IF EXISTS listTasksInState //
 CREATE PROCEDURE listTasksInState (state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'))
 BEGIN
-    SELECT id AS _id, sort AS _sort, title, due, project
+    SELECT id AS _id, sort AS _sort, focus AS _focus, isDueNow(due) AS _dueNow, title, due, project
         FROM todo WHERE todo.state = state AND todo.completed IS NULL ORDER BY project, sort;
 END //
 
 DROP PROCEDURE IF EXISTS listInboxTasks //
 CREATE PROCEDURE listInboxTasks ()
 BEGIN
-    SELECT id AS _id, sort AS _sort, title
+    SELECT id AS _id, sort AS _sort, focus AS _focus, 0 as _dueNow, title
         FROM todo WHERE todo.state IS NULL AND todo.scheduled IS NULL ORDER BY sort;
 END //
 
@@ -115,28 +115,28 @@ BEGIN
         WHERE scheduled <= CURDATE() AND recurringDays IS NOT NULL;
     COMMIT;
 
-    SELECT id AS _id, sort AS _sort, isDueNow(due) AS _dueNow, title, due
+    SELECT id AS _id, sort AS _sort, 0 AS _focus, isDueNow(due) AS _dueNow, title, due
         FROM todo WHERE todo.focus = 1 AND completed IS NULL ORDER BY sort;
 END //
 
 DROP PROCEDURE IF EXISTS listCompletedTasks //
 CREATE PROCEDURE listCompletedTasks ()
 BEGIN
-    SELECT id AS _id, sort AS _sort, title, completed
+    SELECT id AS _id, sort AS _sort, 0 AS _focus, 0 AS _dueNow, title, completed
         FROM todo WHERE todo.completed IS NOT NULL ORDER BY sort;
 END //
 
 DROP PROCEDURE IF EXISTS listScheduledTasks //
 CREATE PROCEDURE listScheduledTasks ()
 BEGIN
-    SELECT id AS _id, sort AS _sort, title, scheduled, recurringDays
+    SELECT id AS _id, sort AS _sort, focus AS _focus, 0 AS _dueNow, title, scheduled, recurringDays
         FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
 END //
 
 DROP PROCEDURE IF EXISTS listTasksForProject //
 CREATE PROCEDURE listTasksForProject (listProjects_project VARCHAR(255))
 BEGIN
-    SELECT id AS _id, sort AS _sort, title, due
+    SELECT id AS _id, sort AS _sort, focus AS _focus, isDueNow(due) AS _dueNow, title, due
         FROM todo WHERE todo.project = listProjects_project ORDER BY state, sort;
 END //
 

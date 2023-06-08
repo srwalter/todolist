@@ -24,8 +24,8 @@ function reorderTasks(proc) {
 
     let lastval = 0;
     for (const r of rows) {
-        const id = parseInt(r.querySelector(':nth-child(3)').textContent);
-        let sort = parseInt(r.querySelector(':nth-child(4)').textContent);
+        const id = parseInt(r.querySelector('[data-wtb-column="_id"]').textContent);
+        let sort = parseInt(r.querySelector('[data-wtb-column="_sort"]').textContent);
 
         if (sort < lastval) {
             sort = lastval+1;
@@ -81,21 +81,23 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
             format_cell(tr, cell, false, {}, first, column_names[i]);
         }
 
-        const id = parseInt(tr.querySelector(':nth-child(3)').textContent);
-        cb.addEventListener('change', (event) => {
-            if (input.checked) {
-                sql_exec(`CALL markCompleted(${id})`);
-            } else {
-                sql_exec(`CALL unmarkCompleted(${id})`);
+        if (!first) {
+            const id = parseInt(tr.querySelector('[data-wtb-column="_id"]').textContent);
+            cb.addEventListener('change', (event) => {
+                if (input.checked) {
+                    sql_exec(`CALL markCompleted(${id})`);
+                } else {
+                    sql_exec(`CALL unmarkCompleted(${id})`);
+                }
+            });
+
+            const isDue = parseInt(tr.querySelector('[data-wtb-column="_dueNow"]').textContent);
+            if (isDue) {
+                tr.setAttribute('class', 'ui-state-error');
             }
-        });
 
-        const isDue = parseInt(tr.querySelector(':nth-child(5)').textContent);
-        if (isDue) {
-            tr.setAttribute('class', 'ui-state-error');
+            format_links(tr, 'index.html', links, row, first, column_names);
         }
-
-        format_links(tr, 'index.html', links, row, first, column_names);
 
         return tr;
     }});
