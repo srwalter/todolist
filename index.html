@@ -5,6 +5,7 @@
         <title>TODO</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.6.4.min.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
         <script src="/wheresthebeef.js"></script>
         <script>
@@ -17,12 +18,36 @@ async function listProjects() {
     await callProcedureFull({proc_name: 'listProjects', links: links, activate: true, show_button: false, show_header: true});
 }
 
+function reorderTasks(proc) {
+    const rows = document.querySelectorAll(`#results_${proc} tr`);
+
+    let lastval = 0;
+    for (const r of rows) {
+        const id = parseInt(r.querySelector(':nth-child(1)').textContent);
+        let sort = parseInt(r.querySelector(':nth-child(2)').textContent);
+
+        if (sort < lastval) {
+            sort = lastval+1;
+            sql_exec(`CALL modifySort(${id}, ${sort})`);
+        }
+
+        lastval = sort;
+    }
+}
+
 async function listTasks(proc, show_button = false) {
     const links = {
         'Details': ['displayTodo', true],
         'Edit': 'modifyTodo',
     };
-    await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button, show_header: true});
+    await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button, show_header: true, after_results:
+    () => {
+        $(`#results_${proc} tbody`).sortable({
+            stop: function(event, ui) {
+                reorderTasks(proc);
+            }
+        }).disableSelection();
+    }});
 }
 
 async function listTasksForProject() {
@@ -30,7 +55,6 @@ async function listTasksForProject() {
 }
 async function listFocusTasks() {
     await listTasks('listFocusTasks');
-    activateProcedure('listFocusTasks');
 }
 async function listTodos() {
     await listTasks('listTodos');

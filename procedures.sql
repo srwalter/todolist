@@ -85,42 +85,42 @@ END //
 DROP PROCEDURE IF EXISTS listTasksInState //
 CREATE PROCEDURE listTasksInState (state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'))
 BEGIN
-    SELECT id AS _id, title, due, project
+    SELECT id AS _id, sort AS _sort, title, due, project
         FROM todo WHERE todo.state = state AND todo.completed IS NULL ORDER BY project, sort;
 END //
 
 DROP PROCEDURE IF EXISTS listInboxTasks //
 CREATE PROCEDURE listInboxTasks ()
 BEGIN
-    SELECT id AS _id, title
+    SELECT id AS _id, sort AS _sort, title
         FROM todo WHERE todo.state IS NULL AND todo.scheduled IS NULL ORDER BY sort;
 END //
 
 DROP PROCEDURE IF EXISTS listFocusTasks //
 CREATE PROCEDURE listFocusTasks ()
 BEGIN
-    SELECT id AS _id, title, due
+    SELECT id AS _id, sort AS _sort, title, due
         FROM todo WHERE todo.focus = 1 AND completed IS NULL ORDER BY sort;
 END //
 
 DROP PROCEDURE IF EXISTS listCompletedTasks //
 CREATE PROCEDURE listCompletedTasks ()
 BEGIN
-    SELECT id AS _id, title, completed
+    SELECT id AS _id, sort AS _sort, title, completed
         FROM todo WHERE todo.completed IS NOT NULL ORDER BY sort;
 END //
 
 DROP PROCEDURE IF EXISTS listScheduledTasks //
 CREATE PROCEDURE listScheduledTasks ()
 BEGIN
-    SELECT id AS _id, title, scheduled, recurringDays
+    SELECT id AS _id, sort AS _sort, title, scheduled, recurringDays
         FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
 END //
 
 DROP PROCEDURE IF EXISTS listTasksForProject //
 CREATE PROCEDURE listTasksForProject (listProjects_project VARCHAR(255))
 BEGIN
-    SELECT id AS _id, title, due
+    SELECT id AS _id, sort AS _sort, title, due
         FROM todo WHERE todo.project = listProjects_project ORDER BY state, sort;
 END //
 
@@ -134,5 +134,11 @@ DROP PROCEDURE IF EXISTS toggleFocus //
 CREATE PROCEDURE toggleFocus (id INT)
 BEGIN
     UPDATE todo SET focus = !focus WHERE todo.id = id;
+END //
+
+DROP PROCEDURE IF EXISTS modifySort //
+CREATE PROCEDURE modifySort (id INT, sort INT)
+BEGIN
+    UPDATE todo SET todo.sort = sort WHERE todo.id = id;
 END //
 
