@@ -99,6 +99,7 @@ END //
 DROP PROCEDURE IF EXISTS listFocusTasks //
 CREATE PROCEDURE listFocusTasks ()
 BEGIN
+    UPDATE todo SET focus = 1 WHERE completed IS NULL AND due <= CURDATE();
     SELECT id AS _id, sort AS _sort, title, due
         FROM todo WHERE todo.focus = 1 AND completed IS NULL ORDER BY sort;
 END //
