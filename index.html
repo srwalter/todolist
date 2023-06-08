@@ -92,8 +92,11 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
             });
 
             const isDue = parseInt(tr.querySelector('[data-wtb-column="_dueNow"]').textContent);
+            const isFocus = parseInt(tr.querySelector('[data-wtb-column="_focus"]').textContent);
             if (isDue) {
                 tr.setAttribute('class', 'ui-state-error');
+            } else if (isFocus) {
+                tr.setAttribute('class', 'ui-state-highlight');
             }
 
             format_links(tr, 'index.html', links, row, first, column_names);
