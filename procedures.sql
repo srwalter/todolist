@@ -33,9 +33,8 @@ BEGIN
     SELECT state FROM todo WHERE todo.id = _id;
     SELECT due FROM todo WHERE todo.id = _id;
     SELECT scheduled, recurringDays FROM todo WHERE todo.id = _id;
-    SELECT scheduled, recurringDays FROM todo WHERE todo.id = _id;
     SELECT project FROM todo WHERE todo.id = _id;
-    SELECT details FROM todo WHERE todo.id = _id;
+    SELECT REPLACE(details, '\n', '\n<br/>') AS details FROM todo WHERE todo.id = _id;
 END //
 
 DROP PROCEDURE IF EXISTS listProjects //

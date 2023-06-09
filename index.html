@@ -146,10 +146,12 @@ async function listScheduledTasks() {
 }
 
 async function displayTodo() {
-    await callProcedure('displayTodo');
+    await callProcedureFull({proc_name: 'displayTodo', show_header: false, output_settings: {
+        details: {trusted_content: true}
+    }});
+    await callProcedureFull({proc_name: 'addTagToTodo'});
     await callProcedureFull({proc_name: 'markCompleted', prev_proc: 'displayTodo', show_header: false});
     await callProcedureFull({proc_name: 'toggleFocus', prev_proc: 'displayTodo', show_header: false});
-    await callProcedureFull({proc_name: 'addTagToTodo'});
     const displayTodo = document.querySelector('#displayTodo_id');
     const addTag = document.querySelector('#addTagToTodo_todoId');
     prefillForms();
