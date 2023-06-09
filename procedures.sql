@@ -98,8 +98,8 @@ END //
 
 DROP VIEW IF EXISTS uncompletedTodo //
 CREATE VIEW uncompletedTodo AS
-    SELECT id AS _id, sort AS _sort, focus AS _focus2, isDueNow(due) AS _dueNow, title, due, project,
-        state AS _state, scheduled AS _scheduled
+    SELECT id AS _id, sort AS _sort, focus AS _focus2, isDueNow(due) AS _dueNow, hasDetails(details) AS _hasDetails,
+        title, due, project, state AS _state, scheduled AS _scheduled
         FROM todo WHERE completed IS NULL ORDER BY project, sort;
 //
 

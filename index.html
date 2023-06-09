@@ -61,7 +61,6 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
         tr.appendChild(td);
         const cb = document.createElement('td');
         tr.appendChild(cb);
-
         let input;
         if (!first) {
             td.setAttribute('class', 'handle');
@@ -82,6 +81,10 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
             format_cell(tr, cell, false, {}, first, column_names[i]);
         }
 
+        const details = document.createElement('td');
+        tr.appendChild(details);
+        details.setAttribute('style', 'width: 0px');
+
         if (!first) {
             const id = parseInt(tr.querySelector('[data-wtb-column="_id"]').textContent);
             cb.addEventListener('change', (event) => {
@@ -98,6 +101,13 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
                 tr.setAttribute('class', 'ui-state-error');
             } else if (isFocus) {
                 tr.setAttribute('class', 'ui-state-highlight');
+            }
+
+            const hasDetails = parseInt(tr.querySelector('[data-wtb-column="_hasDetails"]').textContent);
+            if (hasDetails) {
+                const button = document.createElement('button');
+                details.appendChild(button);
+                button.textContent = "...";
             }
 
             format_links(tr, 'index.html', links, row, first, column_names);
