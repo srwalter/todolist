@@ -203,6 +203,15 @@ BEGIN
     SELECT * FROM tags;
 END //
 
+DROP PROCEDURE IF EXISTS listTagsForTask //
+CREATE PROCEDURE listTagsForTask (id INT)
+BEGIN
+    SELECT tags.id AS _tagId, todo.id AS _todoId, tag FROM todo
+        JOIN todotags ON todo.id = todotags.todoId
+        JOIN tags ON todotags.tagId = tags.id
+        WHERE todo.id = id;
+END //
+
 DROP PROCEDURE IF EXISTS addTagToTodo //
 CREATE PROCEDURE addTagToTodo (listTags_tagId INT, _todoId INT, OUT result VARCHAR(255))
 BEGIN
@@ -227,4 +236,11 @@ BEGIN
 
         SET i = i + 1;
     END WHILE;
+END //
+
+DROP PROCEDURE IF EXISTS removeTag //
+CREATE PROCEDURE removeTag (listTags_tagId INT, _todoId INT, OUT result VARCHAR(255))
+BEGIN
+    DELETE FROM todotags WHERE tagId = listTags_tagId AND todoId = _todoId;
+    SET result = "Success";
 END //
