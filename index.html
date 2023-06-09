@@ -42,8 +42,8 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
     const completed = params.completed;
 
     const links = {
-        'Details': ['displayTodo', true],
         'Edit': 'modifyTodo',
+        'Details': ['displayTodo', true],
     };
     await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button, show_header: true, after_results:
     () => {

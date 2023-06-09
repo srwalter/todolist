@@ -82,25 +82,37 @@ BEGIN
     UPDATE todo SET sort = todoID * 10 WHERE id = todoID;
 END //
 
-DROP PROCEDURE IF EXISTS listTasksInState //
-CREATE PROCEDURE listTasksInState (state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'))
-BEGIN
-    SELECT id AS _id, sort AS _sort, focus AS _focus, isDueNow(due) AS _dueNow, title, due, project
-        FROM todo WHERE todo.state = state AND todo.completed IS NULL ORDER BY project, sort;
-END //
-
-DROP PROCEDURE IF EXISTS listInboxTasks //
-CREATE PROCEDURE listInboxTasks ()
-BEGIN
-    SELECT id AS _id, sort AS _sort, focus AS _focus, 0 as _dueNow, title
-        FROM todo WHERE todo.state IS NULL AND todo.scheduled IS NULL ORDER BY sort;
-END //
-
 DROP FUNCTION IF EXISTS isDueNow //
 CREATE FUNCTION isDueNow (due DATE)
 RETURNS tinyint(1)
 BEGIN
     RETURN due <= CURDATE();
+END //
+
+DROP FUNCTION IF EXISTS hasDetails //
+CREATE FUNCTION hasDetails (details TEXT)
+RETURNS tinyint(1)
+BEGIN
+    RETURN details != "";
+END //
+
+DROP VIEW IF EXISTS uncompletedTodo //
+CREATE VIEW uncompletedTodo AS
+    SELECT id AS _id, sort AS _sort, focus AS _focus2, isDueNow(due) AS _dueNow, title, due, project,
+        state AS _state, scheduled AS _scheduled
+        FROM todo WHERE completed IS NULL ORDER BY project, sort;
+//
+
+DROP PROCEDURE IF EXISTS listTasksInState //
+CREATE PROCEDURE listTasksInState (state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'))
+BEGIN
+    SELECT *, _focus2 AS _focus FROM uncompletedTodo WHERE _state = state;
+END //
+
+DROP PROCEDURE IF EXISTS listInboxTasks //
+CREATE PROCEDURE listInboxTasks ()
+BEGIN
+    SELECT * FROM uncompletedTodo WHERE _state IS NULL AND _scheduled IS NULL;
 END //
 
 DROP PROCEDURE IF EXISTS listFocusTasks //
@@ -115,8 +127,7 @@ BEGIN
         WHERE scheduled <= CURDATE() AND recurringDays IS NOT NULL;
     COMMIT;
 
-    SELECT id AS _id, sort AS _sort, 0 AS _focus, isDueNow(due) AS _dueNow, title, due
-        FROM todo WHERE todo.focus = 1 AND completed IS NULL ORDER BY sort;
+    SELECT *, 0 AS _focus FROM uncompletedTodo WHERE _focus2 = 1;
 END //
 
 DROP PROCEDURE IF EXISTS listCompletedTasks //
@@ -136,8 +147,7 @@ END //
 DROP PROCEDURE IF EXISTS listTasksForProject //
 CREATE PROCEDURE listTasksForProject (listProjects_project VARCHAR(255))
 BEGIN
-    SELECT id AS _id, sort AS _sort, focus AS _focus, isDueNow(due) AS _dueNow, title, due
-        FROM todo WHERE todo.project = listProjects_project ORDER BY state, sort;
+    SELECT *, _focus2 AS _focus FROM uncompletedTodo WHERE project = listProjects_project;
 END //
 
 DROP PROCEDURE IF EXISTS addTaskToProject //
