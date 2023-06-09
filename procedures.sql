@@ -109,6 +109,13 @@ BEGIN
         WHERE _state = state AND tagId = listTags_tagId OR tagId IS NULL;
 END //
 
+DROP PROCEDURE IF EXISTS listUntaggedTasks //
+CREATE PROCEDURE listUntaggedTasks ()
+BEGIN
+    SELECT uncompletedTodo.* FROM uncompletedTodo LEFT JOIN todotags ON _id = todotags.todoId
+        WHERE tagId IS NULL;
+END //
+
 DROP PROCEDURE IF EXISTS listInboxTasks //
 CREATE PROCEDURE listInboxTasks ()
 BEGIN
@@ -201,4 +208,23 @@ CREATE PROCEDURE addTagToTodo (listTags_tagId INT, _todoId INT, OUT result VARCH
 BEGIN
     INSERT INTO todotags (tagId, todoId) VALUES (listTags_tagId, _todoId);
     SET result = "Success";
+END //
+
+DROP PROCEDURE IF EXISTS addTagToTodos //
+CREATE PROCEDURE addTagToTodos (_id JSON, listTags_tagId INT, OUT result VARCHAR(255))
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE array_length INT;
+    DECLARE str VARCHAR(255);
+    DECLARE curr INT;
+
+    SET array_length = JSON_LENGTH(_id);
+
+    WHILE i <= array_length DO
+        SET str = JSON_EXTRACT(_id, CONCAT('$[', i-1, ']'));
+        SET curr = CAST(REPLACE(str, '"', '') AS UNSIGNED);
+        CALL addTagToTodo(listTags_tagId, curr, result);
+
+        SET i = i + 1;
+    END WHILE;
 END //
