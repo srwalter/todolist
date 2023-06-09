@@ -43,7 +43,7 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
 
     const links = {
         'Edit': 'modifyTodo',
-        'Details': ['displayTodo', true],
+        'Details': 'displayTodo',
     };
     await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button, show_header: true, after_results:
     () => {
@@ -149,6 +149,12 @@ async function displayTodo() {
     await callProcedure('displayTodo');
     await callProcedureFull({proc_name: 'markCompleted', prev_proc: 'displayTodo', show_header: false});
     await callProcedureFull({proc_name: 'toggleFocus', prev_proc: 'displayTodo', show_header: false});
+    await callProcedureFull({proc_name: 'addTagToTodo'});
+    const displayTodo = document.querySelector('#displayTodo_id');
+    const addTag = document.querySelector('#addTagToTodo_todoId');
+    prefillForms();
+    activateProcedure('displayTodo');
+    addTag.value = displayTodo.value;
 }
 
 async function modifyTodo() {
@@ -207,6 +213,7 @@ async function onLoad() {
             <li><a href="?proc=listScheduledTasks&autosubmit=listScheduledTasks">List Scheduled</a></li>
             <li><a href="?proc=listCompletedTasks">Show Completed</a></li>
             <li><a href="?proc=listTodos">List Todos</a></li>
+            <li><a href="?proc=createTag">Create Tag</a></li>
           </ul>
         </div>
         <div class="btn-group">

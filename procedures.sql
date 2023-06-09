@@ -100,7 +100,7 @@ DROP VIEW IF EXISTS uncompletedTodo //
 CREATE VIEW uncompletedTodo AS
     SELECT id AS _id, sort AS _sort, focus AS _focus2, isDueNow(due) AS _dueNow, hasDetails(details) AS _hasDetails,
         title, due, project, state AS _state, scheduled AS _scheduled
-        FROM todo WHERE completed IS NULL ORDER BY project, sort;
+        FROM todo WHERE completed IS NULL ORDER BY focus DESC, project, sort;
 //
 
 DROP PROCEDURE IF EXISTS listTasksInState //
@@ -183,3 +183,22 @@ BEGIN
     UPDATE todo SET todo.sort = sort WHERE todo.id = id;
 END //
 
+DROP PROCEDURE IF EXISTS createTag //
+CREATE PROCEDURE createTag (tag VARCHAR(255), OUT tagId INT)
+BEGIN
+    INSERT INTO tags (tag) VALUES (tag);
+    SET tagID = LAST_INSERT_ID();
+END //
+
+DROP PROCEDURE IF EXISTS listTags //
+CREATE PROCEDURE listTags ()
+BEGIN
+    SELECT * FROM tags;
+END //
+
+DROP PROCEDURE IF EXISTS addTagToTodo //
+CREATE PROCEDURE addTagToTodo (listTags_tagId INT, _todoId INT, OUT result VARCHAR(255))
+BEGIN
+    INSERT INTO todotags (tagId, todoId) VALUES (listTags_tagId, _todoId);
+    SET result = "Success";
+END //

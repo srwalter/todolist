@@ -19,3 +19,16 @@ CREATE TABLE reference (
     details TEXT,
     library VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tag VARCHAR(255)
+);
+
+CREATE TABLE todotags (
+    tagId INT,
+    todoId INT,
+    FOREIGN KEY (tagId) REFERENCES tags(id),
+    FOREIGN KEY (todoId) REFERENCES todo(id),
+    PRIMARY KEY (tagId, todoId)
+);
