@@ -141,7 +141,7 @@ DROP PROCEDURE IF EXISTS listCompletedTasks //
 CREATE PROCEDURE listCompletedTasks ()
 BEGIN
     SELECT id AS _id, sort AS _sort, 0 AS _focus, 0 AS _dueNow, hasDetails(details) AS _hasDetails, title, completed
-        FROM todo WHERE todo.completed IS NOT NULL ORDER BY sort;
+        FROM todo WHERE completed IS NOT NULL ORDER BY completed;
 END //
 
 DROP PROCEDURE IF EXISTS listScheduledTasks //
