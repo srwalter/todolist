@@ -244,3 +244,66 @@ BEGIN
     DELETE FROM todotags WHERE tagId = listTags_tagId AND todoId = _todoId;
     SET result = "Success";
 END //
+
+DROP PROCEDURE IF EXISTS createReflist //
+CREATE PROCEDURE createReflist (name VARCHAR(255), details TEXT, OUT reflistId INT)
+BEGIN
+    INSERT INTO reflist (name, details) VALUES (name, details);
+    SET reflistId = LAST_INSERT_ID();
+END //
+
+DROP PROCEDURE IF EXISTS listReflists //
+CREATE PROCEDURE listReflists ()
+BEGIN
+    SELECT reflistId AS _reflistId, name FROM reflist WHERE library IS NULL;
+END //
+
+DROP PROCEDURE IF EXISTS listAllReflists //
+CREATE PROCEDURE listAllReflists ()
+BEGIN
+    SELECT reflistId AS _reflistId, name FROM reflist;
+END //
+
+DROP PROCEDURE IF EXISTS listReflistsForLibrary //
+CREATE PROCEDURE listReflistsForLibrary (listLibraries_library VARCHAR(255))
+BEGIN
+    SELECT reflistId AS _reflistId, name FROM reflist WHERE library = listLibraries_library;
+END //
+
+DROP PROCEDURE IF EXISTS listLibraries //
+CREATE PROCEDURE listLibraries ()
+BEGIN
+    SELECT DISTINCT library, library AS _library FROM reflist;
+END //
+
+DROP PROCEDURE IF EXISTS modifyReflist //
+CREATE PROCEDURE modifyReflist (reflistId INT, name VARCHAR(255), details TEXT, newLibrary VARCHAR(255),
+    listLibraries_existingLibrary VARCHAR(255), OUT result VARCHAR(255))
+BEGIN
+    DECLARE library VARCHAR(255);
+
+    IF (newLibrary IS NOT NULL) THEN
+        SET library = newLibrary;
+    ELSE
+        SET library = listLibraries_existingLibrary;
+    END IF;
+
+    UPDATE reflist AS r SET r.name = name, r.details = details, r.library = library
+        WHERE r.reflistId = reflistId;
+    SET result = "Success";
+END //
+
+DROP PROCEDURE IF EXISTS createReference //
+CREATE PROCEDURE createReference (listAllReflists_reflistId INT, title VARCHAR(255), details TEXT, OUT reflistId INT)
+BEGIN
+    INSERT INTO reference (sort, title, details, reflistId) VALUES (0, title, details, listAllReflists_reflistId);
+    SET reflistId = LAST_INSERT_ID();
+    UPDATE reference SET sort = reflistId * 10 WHERE id = reflistId;
+END //
+
+DROP PROCEDURE IF EXISTS listReferences //
+CREATE PROCEDURE listReferences (_reflistId INT)
+BEGIN
+    SELECT id AS _id, sort AS _sort, title, details FROM reference WHERE reflistId = _reflistId;
+END //
+

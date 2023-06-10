@@ -13,6 +13,28 @@
         <script>
 var database = "todo";
 
+async function listReferences() {
+    await callProcedureFull({proc_name: 'listReferences'})
+}
+
+async function listReflistsGeneric(proc_name) {
+    await callProcedureFull({proc_name: proc_name, activate: true, show_button: false, links: {
+        'Show': ['listReferences', true],
+        'Edit': 'modifyReflist'
+    }});
+}
+
+async function listReflistsForLibrary() {
+    await listReflistsGeneric('listReflistsForLibrary');
+}
+
+async function listLibraries() {
+    await listReflistsGeneric('listReflists');
+    await callProcedureFull({proc_name: 'listLibraries', activate: true, show_button: false, links: {
+        'Show': 'listReflistsForLibrary'
+    }});
+}
+
 async function addTagsToTodos() {
     await callProcedureSelectMany('listUntaggedTasks', 'addTagToTodos');
     await callProcedure('addTagToTodos', false);
@@ -194,6 +216,12 @@ async function onLoad() {
             await listTasksForProject();
         } else if (q['proc'] == 'listProjects') {
             await listProjects();
+        } else if (q['proc'] == 'listLibraries') {
+            await listLibraries();
+        } else if (q['proc'] == 'listReferences') {
+            await listReferences();
+        } else if (q['proc'] == 'listReflistsForLibrary') {
+            await listReflistsForLibrary();
         } else if (q['proc'] == 'addTagsToTodos') {
             await addTagsToTodos();
         } else if (q['proc'] == 'displayTodo') {
@@ -231,6 +259,16 @@ async function onLoad() {
             <li><a href="?proc=listTodos">List Task</a></li>
             <li><a href="?proc=addTagsToTodos&autosubmit=listUntaggedTasks">Tag Tasks</a></li>
             <li><a href="?proc=createTag">Create Tag</a></li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Reference <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+              <li><a href="?proc=listLibraries">List Libraries</a></li>
+              <li><a href="?proc=createReflist">Create Reference List</a></li>
+              <li><a href="?proc=createReference">Create Reference Item</a></li>
           </ul>
         </div>
         <div class="btn-group">

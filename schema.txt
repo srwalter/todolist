@@ -12,12 +12,20 @@ CREATE TABLE todo (
     project VARCHAR(255)
 );
 
+CREATE TABLE reflist (
+    reflistId INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    details TEXT,
+    library VARCHAR(255)
+);
+
 CREATE TABLE reference (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sort INT NOT NULL,
     title VARCHAR(512) NOT NULL,
     details TEXT,
-    library VARCHAR(255) NOT NULL
+    reflistId INT NOT NULL,
+    FOREIGN KEY (reflistId) REFERENCES reflist(reflistId)
 );
 
 CREATE TABLE tags (
