@@ -136,8 +136,11 @@ async function listFocusTasks() {
     await listTasks('listFocusTasks');
 }
 async function listTodos() {
-    await listTasks('listTodos');
-    activateProcedure('listTodos');
+    const links = {
+        'Edit': 'modifyTodo',
+        'Details': 'displayTodo',
+    };
+    await callProcedureFull({proc_name: 'listTodos', links: links, activate: true, show_button: false, show_header: true});
 }
 async function listTasksInState() {
     await listTasks('listTasksInState', {show_button: true});
