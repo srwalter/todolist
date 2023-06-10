@@ -64,6 +64,68 @@ function reorderTasks(proc) {
     }
 }
 
+function format_task(links, completed, row, first, column_names) {
+    var tr = document.createElement('tr');
+
+    const td = document.createElement('td');
+    tr.appendChild(td);
+    const cb = document.createElement('td');
+    tr.appendChild(cb);
+    let input;
+    if (!first) {
+        td.setAttribute('class', 'handle');
+        td.setAttribute('style', 'cursor: move; width: 0px');
+        td.textContent = '::';
+
+        input = document.createElement('input');
+        cb.appendChild(input);
+        input.setAttribute('type', 'checkbox');
+        if (completed) {
+            input.checked = true;
+        }
+        cb.setAttribute('style', 'width: 0px');
+    }
+
+    for (let i=0; i < row.length; i++) {
+        const cell = row[i];
+        format_cell(tr, cell, false, {}, first, column_names[i]);
+    }
+
+    const details = document.createElement('td');
+    tr.appendChild(details);
+    details.setAttribute('style', 'width: 0px');
+
+    if (!first) {
+        const id = parseInt(tr.querySelector('[data-wtb-column="_id"]').textContent);
+        cb.addEventListener('change', (event) => {
+            if (input.checked) {
+                sql_exec(`CALL markCompleted(${id})`);
+            } else {
+                sql_exec(`CALL unmarkCompleted(${id})`);
+            }
+        });
+
+        const isDue = parseInt(tr.querySelector('[data-wtb-column="_dueNow"]').textContent);
+        const isFocus = parseInt(tr.querySelector('[data-wtb-column="_focus"]').textContent);
+        if (isDue) {
+            tr.setAttribute('class', 'ui-state-error');
+        } else if (isFocus) {
+            tr.setAttribute('class', 'ui-state-highlight');
+        }
+
+        const hasDetails = parseInt(tr.querySelector('[data-wtb-column="_hasDetails"]').textContent);
+        if (hasDetails) {
+            const button = document.createElement('button');
+            details.appendChild(button);
+            button.textContent = "...";
+        }
+
+        format_links(tr, 'index.html', links, row, first, column_names);
+    }
+
+    return tr;
+}
+
 async function listTasks(proc, params = {show_button: false, completed: false}) {
     const show_button = params.show_button;
     const completed = params.completed;
@@ -82,65 +144,7 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
             }
         }).disableSelection();
     }, format_row: (row, first, column_names) => {
-        var tr = document.createElement('tr');
-
-        const td = document.createElement('td');
-        tr.appendChild(td);
-        const cb = document.createElement('td');
-        tr.appendChild(cb);
-        let input;
-        if (!first) {
-            td.setAttribute('class', 'handle');
-            td.setAttribute('style', 'cursor: move; width: 0px');
-            td.textContent = '::';
-
-            input = document.createElement('input');
-            cb.appendChild(input);
-            input.setAttribute('type', 'checkbox');
-            if (completed) {
-                input.checked = true;
-            }
-            cb.setAttribute('style', 'width: 0px');
-        }
-
-        for (let i=0; i < row.length; i++) {
-            const cell = row[i];
-            format_cell(tr, cell, false, {}, first, column_names[i]);
-        }
-
-        const details = document.createElement('td');
-        tr.appendChild(details);
-        details.setAttribute('style', 'width: 0px');
-
-        if (!first) {
-            const id = parseInt(tr.querySelector('[data-wtb-column="_id"]').textContent);
-            cb.addEventListener('change', (event) => {
-                if (input.checked) {
-                    sql_exec(`CALL markCompleted(${id})`);
-                } else {
-                    sql_exec(`CALL unmarkCompleted(${id})`);
-                }
-            });
-
-            const isDue = parseInt(tr.querySelector('[data-wtb-column="_dueNow"]').textContent);
-            const isFocus = parseInt(tr.querySelector('[data-wtb-column="_focus"]').textContent);
-            if (isDue) {
-                tr.setAttribute('class', 'ui-state-error');
-            } else if (isFocus) {
-                tr.setAttribute('class', 'ui-state-highlight');
-            }
-
-            const hasDetails = parseInt(tr.querySelector('[data-wtb-column="_hasDetails"]').textContent);
-            if (hasDetails) {
-                const button = document.createElement('button');
-                details.appendChild(button);
-                button.textContent = "...";
-            }
-
-            format_links(tr, 'index.html', links, row, first, column_names);
-        }
-
-        return tr;
+        return format_task(links, completed, row, first, column_names);
     }});
 }
 
