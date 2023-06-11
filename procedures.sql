@@ -167,15 +167,23 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS markCompleted //
-CREATE PROCEDURE markCompleted (id INT)
+CREATE PROCEDURE markCompleted (id INT, isReference INT)
 BEGIN
-    UPDATE todo SET completed = CURDATE() WHERE todo.id = id;
+    IF (isReference) THEN
+        UPDATE reference SET completed = 1 WHERE reference.id = id;
+    ELSE
+        UPDATE todo SET completed = CURDATE() WHERE todo.id = id;
+    END IF;
 END //
 
 DROP PROCEDURE IF EXISTS unmarkCompleted //
-CREATE PROCEDURE unmarkCompleted (id INT)
+CREATE PROCEDURE unmarkCompleted (id INT, isReference INT)
 BEGIN
-    UPDATE todo SET completed = NULL WHERE todo.id = id;
+    IF (isReference) THEN
+        UPDATE reference SET completed = 0 WHERE reference.id = id;
+    ELSE
+        UPDATE todo SET completed = NULL WHERE todo.id = id;
+    END IF;
 END //
 
 DROP PROCEDURE IF EXISTS toggleFocus //
