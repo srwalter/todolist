@@ -195,9 +195,13 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS modifySort //
-CREATE PROCEDURE modifySort (id INT, sort INT)
+CREATE PROCEDURE modifySort (id INT, sort INT, isReference INT)
 BEGIN
-    UPDATE todo SET todo.sort = sort WHERE todo.id = id;
+    IF (isReference) THEN
+        UPDATE reference SET reference.sort = sort WHERE reference.id = id;
+    ELSE
+        UPDATE todo SET todo.sort = sort WHERE todo.id = id;
+    END IF;
 END //
 
 DROP PROCEDURE IF EXISTS createTag //
@@ -314,6 +318,7 @@ END //
 DROP PROCEDURE IF EXISTS listReferences //
 CREATE PROCEDURE listReferences (_reflistId INT)
 BEGIN
-    SELECT id AS _id, sort AS _sort, completed AS _completed, title, details FROM reference WHERE reflistId = _reflistId;
+    SELECT id AS _id, sort AS _sort, completed AS _completed, title, details FROM reference
+        WHERE reflistId = _reflistId ORDER BY sort;
 END //
 

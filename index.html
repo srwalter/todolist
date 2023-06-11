@@ -14,9 +14,18 @@
 var database = "todo";
 
 async function listReferences() {
-    await callProcedureFull({proc_name: 'listReferences', format_row: (row, first, column_names) => {
+    const proc = 'listReferences';
+    await callProcedureFull({proc_name: proc, format_row: (row, first, column_names) => {
         return format_task(true, {}, row, first, column_names);
-    }})
+    }, after_results: () => {
+        $(`#results_${proc} tbody`).sortable({
+            handle: ".handle",
+            axis: 'y',
+            stop: function(event, ui) {
+                reorderTasks(proc, true);
+            }
+        }).disableSelection();
+    }});
 }
 
 async function listReflistsGeneric(proc_name) {
@@ -49,8 +58,8 @@ async function listProjects() {
     await callProcedureFull({proc_name: 'listProjects', links: links, activate: true, show_button: false, show_header: true});
 }
 
-function reorderTasks(proc) {
-    const rows = document.querySelectorAll(`#results_${proc} tr`);
+function reorderTasks(proc, reference) {
+    const rows = document.querySelectorAll(`#results_${proc} tbody tr`);
 
     let lastval = 0;
     for (const r of rows) {
@@ -59,7 +68,7 @@ function reorderTasks(proc) {
 
         if (sort < lastval) {
             sort = lastval+1;
-            sql_exec(`CALL modifySort(${id}, ${sort})`);
+            sql_exec(`CALL modifySort(${id}, ${sort}, ${reference})`);
         }
 
         lastval = sort;
@@ -143,7 +152,7 @@ async function listTasks(proc, params = {show_button: false}) {
             handle: ".handle",
             axis: 'y',
             stop: function(event, ui) {
-                reorderTasks(proc);
+                reorderTasks(proc, false);
             }
         }).disableSelection();
     }, format_row: (row, first, column_names) => {
