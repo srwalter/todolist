@@ -287,7 +287,7 @@ END //
 DROP PROCEDURE IF EXISTS listLibraries //
 CREATE PROCEDURE listLibraries ()
 BEGIN
-    SELECT DISTINCT library, library AS _library FROM reflist;
+    SELECT DISTINCT library, library AS _library FROM reflist WHERE library IS NOT NULL;
 END //
 
 DROP PROCEDURE IF EXISTS modifyReflist //
