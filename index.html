@@ -14,7 +14,9 @@
 var database = "todo";
 
 async function listReferences() {
-    await callProcedureFull({proc_name: 'listReferences'})
+    await callProcedureFull({proc_name: 'listReferences', format_row: (row, first, column_names) => {
+        return format_task(true, {}, row, first, column_names);
+    }})
 }
 
 async function listReflistsGeneric(proc_name) {
@@ -64,7 +66,7 @@ function reorderTasks(proc) {
     }
 }
 
-function format_task(reference, links, completed, row, first, column_names) {
+function format_task(reference, links, row, first, column_names) {
     var tr = document.createElement('tr');
 
     const td = document.createElement('td');
@@ -80,9 +82,6 @@ function format_task(reference, links, completed, row, first, column_names) {
         input = document.createElement('input');
         cb.appendChild(input);
         input.setAttribute('type', 'checkbox');
-        if (completed) {
-            input.checked = true;
-        }
         cb.setAttribute('style', 'width: 0px');
     }
 
@@ -105,6 +104,11 @@ function format_task(reference, links, completed, row, first, column_names) {
             }
         });
 
+        const completed = tr.querySelector('[data-wtb-column="_completed"]');
+        if (completed && parseInt(completed.textContent)) {
+            input.checked = true;
+        }
+
         const isDue = tr.querySelector('[data-wtb-column="_dueNow"]');
         const isFocus = tr.querySelector('[data-wtb-column="_focus"]');
         if (isDue && parseInt(isDue.textContent)) {
@@ -126,9 +130,8 @@ function format_task(reference, links, completed, row, first, column_names) {
     return tr;
 }
 
-async function listTasks(proc, params = {show_button: false, completed: false}) {
+async function listTasks(proc, params = {show_button: false}) {
     const show_button = params.show_button;
-    const completed = params.completed;
 
     const links = {
         'Edit': 'modifyTodo',
@@ -144,7 +147,7 @@ async function listTasks(proc, params = {show_button: false, completed: false}) 
             }
         }).disableSelection();
     }, format_row: (row, first, column_names) => {
-        return format_task(false, links, completed, row, first, column_names);
+        return format_task(false, links, row, first, column_names);
     }});
 }
 
@@ -172,7 +175,7 @@ async function listTasksInState() {
     await listTasks('listTasksInState', {show_button: true});
 }
 async function listCompletedTasks() {
-    await listTasks('listCompletedTasks', {completed: true});
+    await listTasks('listCompletedTasks');
 }
 async function listScheduledTasks() {
     await listTasks('listScheduledTasks');
