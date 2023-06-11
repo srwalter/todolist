@@ -8,6 +8,7 @@ CREATE TABLE todo (
     due DATE,
     scheduled DATE,
     recurringDays INT,
+    recurringMonths INT,
     details TEXT,
     project VARCHAR(255)
 );

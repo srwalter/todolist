@@ -3,10 +3,10 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS createTodo //
 CREATE PROCEDURE createTodo (title VARCHAR(512), focus tinyint(1),
     state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'),
-    due DATE, scheduled DATE, recurringDays INT, details TEXT, OUT todoID INT)
+    due DATE, scheduled DATE, recurringDays INT, recurringMonths INT, details TEXT, OUT todoID INT)
 BEGIN
-    INSERT INTO todo (sort, title, focus, state, due, scheduled, recurringDays, details)
-        VALUES (0, title, focus, state, due, scheduled, recurringDays, details);
+    INSERT INTO todo (sort, title, focus, state, due, scheduled, recurringDays, recurringMonths, details)
+        VALUES (0, title, focus, state, due, scheduled, recurringDays, recurringMonths, details);
     SET todoID = LAST_INSERT_ID();
     UPDATE todo SET sort = todoID * 10 WHERE id = todoID;
 END //
@@ -32,7 +32,7 @@ BEGIN
     SELECT focus FROM todo WHERE todo.id = _id;
     SELECT state FROM todo WHERE todo.id = _id;
     SELECT due FROM todo WHERE todo.id = _id;
-    SELECT scheduled, recurringDays FROM todo WHERE todo.id = _id;
+    SELECT scheduled, recurringDays, recurringMonths FROM todo WHERE todo.id = _id;
     SELECT project FROM todo WHERE todo.id = _id;
     SELECT REPLACE(details, '\n', '\n<br/>') AS details FROM todo WHERE todo.id = _id;
 END //
@@ -46,7 +46,7 @@ END //
 DROP PROCEDURE IF EXISTS modifyTodo //
 CREATE PROCEDURE modifyTodo (_id INT, title VARCHAR(512), completed DATE, focus tinyint(1),
     state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'),
-    due DATE, scheduled DATE, recurringDays INT,
+    due DATE, scheduled DATE, recurringDays INT, recurringMonths INT,
     newProjectName VARCHAR(255), listProjects_project VARCHAR(255),
     details TEXT, OUT result VARCHAR(255))
 BEGIN
@@ -66,6 +66,7 @@ BEGIN
         t.due = due,
         t.scheduled = scheduled,
         t.recurringDays = recurringDays,
+        t.recurringMonths = recurringMonths,
         t.project = grp,
         t.details = details
         WHERE t.id = _id;
@@ -130,9 +131,11 @@ BEGIN
 
     START TRANSACTION;
     UPDATE todo SET focus = 1 WHERE completed IS NULL AND scheduled <= CURDATE();
-    UPDATE todo SET scheduled = NULL WHERE scheduled <= CURDATE() AND recurringDays IS NULL;
+    UPDATE todo SET scheduled = NULL WHERE scheduled <= CURDATE() AND recurringDays IS NULL AND recurringMonths IS NULL;
     UPDATE todo SET completed = NULL, scheduled = DATE_ADD(scheduled, INTERVAL recurringDays DAY)
         WHERE scheduled <= CURDATE() AND recurringDays IS NOT NULL;
+    UPDATE todo SET completed = NULL, scheduled = DATE_ADD(scheduled, INTERVAL recurringMonths MONTH)
+        WHERE scheduled <= CURDATE() AND recurringMonths IS NOT NULL;
     COMMIT;
 
     SELECT *, 0 AS _focus FROM uncompletedTodo WHERE _focus2 = 1;
@@ -149,7 +152,7 @@ END //
 DROP PROCEDURE IF EXISTS listScheduledTasks //
 CREATE PROCEDURE listScheduledTasks ()
 BEGIN
-    SELECT id AS _id, sort AS _sort, focus AS _focus, 0 AS _dueNow, title, scheduled, recurringDays, completed AS _completed
+    SELECT id AS _id, sort AS _sort, focus AS _focus, 0 AS _dueNow, title, scheduled, recurringDays, recurringMonths, completed AS _completed
         FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
 END //
 
