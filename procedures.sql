@@ -98,6 +98,7 @@ END //
 DROP VIEW IF EXISTS uncompletedTodo //
 CREATE VIEW uncompletedTodo AS
     SELECT id AS _id, sort AS _sort, focus AS _focus2, isDueNow(due) AS _dueNow, hasDetails(details) AS _hasDetails,
+        0 AS _completed,
         title, due, project, state AS _state, scheduled AS _scheduled
         FROM todo WHERE completed IS NULL ORDER BY focus DESC, project, sort;
 //
@@ -140,14 +141,15 @@ END //
 DROP PROCEDURE IF EXISTS listCompletedTasks //
 CREATE PROCEDURE listCompletedTasks ()
 BEGIN
-    SELECT id AS _id, sort AS _sort, 0 AS _focus, 0 AS _dueNow, hasDetails(details) AS _hasDetails, title, completed
+    SELECT id AS _id, sort AS _sort, 0 AS _focus, 0 AS _dueNow, hasDetails(details) AS _hasDetails, title, completed,
+        1 as _completed
         FROM todo WHERE completed IS NOT NULL ORDER BY completed;
 END //
 
 DROP PROCEDURE IF EXISTS listScheduledTasks //
 CREATE PROCEDURE listScheduledTasks ()
 BEGIN
-    SELECT id AS _id, sort AS _sort, focus AS _focus, 0 AS _dueNow, title, scheduled, recurringDays
+    SELECT id AS _id, sort AS _sort, focus AS _focus, 0 AS _dueNow, title, scheduled, recurringDays, completed AS _completed
         FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
 END //
 
@@ -312,6 +314,6 @@ END //
 DROP PROCEDURE IF EXISTS listReferences //
 CREATE PROCEDURE listReferences (_reflistId INT)
 BEGIN
-    SELECT id AS _id, sort AS _sort, title, details FROM reference WHERE reflistId = _reflistId;
+    SELECT id AS _id, sort AS _sort, completed AS _completed, title, details FROM reference WHERE reflistId = _reflistId;
 END //
 
