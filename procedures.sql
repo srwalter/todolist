@@ -23,8 +23,8 @@ END //
 DROP PROCEDURE IF EXISTS listTodos //
 CREATE PROCEDURE listTodos ()
 BEGIN
-    SELECT id AS _id, completed, title, state, due
-        FROM todo ORDER BY sort;
+    SELECT id AS _id, title, state, due
+        FROM todo WHERE completed IS NULL ORDER BY state, project, sort;
 END //
 
 DROP PROCEDURE IF EXISTS showTodo //
