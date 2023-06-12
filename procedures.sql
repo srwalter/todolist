@@ -3,10 +3,19 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS createTodo //
 CREATE PROCEDURE createTodo (title VARCHAR(512), focus tinyint(1),
     state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'),
+    newProjectName VARCHAR(255), listProjects_project VARCHAR(255),
     due DATE, scheduled DATE, recurringDays INT, recurringMonths INT, details TEXT, OUT todoID INT)
 BEGIN
-    INSERT INTO todo (sort, title, focus, state, due, scheduled, recurringDays, recurringMonths, details)
-        VALUES (0, title, focus, state, due, scheduled, recurringDays, recurringMonths, details);
+    DECLARE grp VARCHAR(255);
+
+    IF (newProjectName IS NOT NULL) THEN
+        SET grp = newProjectName;
+    ELSE
+        SET grp = listProjects_project;
+    END IF;
+
+    INSERT INTO todo (sort, title, focus, state, due, scheduled, recurringDays, recurringMonths, details, project)
+        VALUES (0, title, focus, state, due, scheduled, recurringDays, recurringMonths, details, grp);
     SET todoID = LAST_INSERT_ID();
     UPDATE todo SET sort = todoID * 10 WHERE id = todoID;
 END //
