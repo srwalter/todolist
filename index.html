@@ -110,36 +110,39 @@ function format_task(reference, links, row, first, column_names) {
     details.setAttribute('style', 'width: 0px');
 
     if (!first) {
-        const id = parseInt(tr.querySelector('[data-wtb-column="_id"]').textContent);
-        cb.addEventListener('change', (event) => {
-            if (input.checked) {
-                sql_exec(`CALL markCompleted(${id}, ${reference})`);
-            } else {
-                sql_exec(`CALL unmarkCompleted(${id}, ${reference})`);
+        const id_elem = tr.querySelector('[data-wtb-column="_id"]');
+        if (id_elem) {
+            const id = parseInt(id_elem.textContent);
+            cb.addEventListener('change', (event) => {
+                if (input.checked) {
+                    sql_exec(`CALL markCompleted(${id}, ${reference})`);
+                } else {
+                    sql_exec(`CALL unmarkCompleted(${id}, ${reference})`);
+                }
+            });
+
+            const completed = tr.querySelector('[data-wtb-column="_completed"]');
+            if (completed && parseInt(completed.textContent)) {
+                input.checked = true;
             }
-        });
 
-        const completed = tr.querySelector('[data-wtb-column="_completed"]');
-        if (completed && parseInt(completed.textContent)) {
-            input.checked = true;
+            const isDue = tr.querySelector('[data-wtb-column="_dueNow"]');
+            const isFocus = tr.querySelector('[data-wtb-column="_focus"]');
+            if (isDue && parseInt(isDue.textContent)) {
+                tr.setAttribute('class', 'ui-state-error');
+            } else if (isFocus && parseInt(isFocus.textContent)) {
+                tr.setAttribute('class', 'ui-state-highlight');
+            }
+
+            const hasDetails = tr.querySelector('[data-wtb-column="_hasDetails"]');
+            if (hasDetails && parseInt(hasDetails.textContent)) {
+                const button = document.createElement('button');
+                details.appendChild(button);
+                button.textContent = "...";
+            }
+
+            format_links(tr, 'index.html', links, row, first, column_names);
         }
-
-        const isDue = tr.querySelector('[data-wtb-column="_dueNow"]');
-        const isFocus = tr.querySelector('[data-wtb-column="_focus"]');
-        if (isDue && parseInt(isDue.textContent)) {
-            tr.setAttribute('class', 'ui-state-error');
-        } else if (isFocus && parseInt(isFocus.textContent)) {
-            tr.setAttribute('class', 'ui-state-highlight');
-        }
-
-        const hasDetails = tr.querySelector('[data-wtb-column="_hasDetails"]');
-        if (hasDetails && parseInt(hasDetails.textContent)) {
-            const button = document.createElement('button');
-            details.appendChild(button);
-            button.textContent = "...";
-        }
-
-        format_links(tr, 'index.html', links, row, first, column_names);
     }
 
     return tr;
