@@ -130,7 +130,7 @@ BEGIN
     UPDATE todo SET focus = 1 WHERE completed IS NULL AND isDueNow(due);
 
     START TRANSACTION;
-    UPDATE todo SET focus = 1 WHERE completed IS NULL AND scheduled <= CURDATE();
+    UPDATE todo SET focus = 1, state = 'Next' WHERE completed IS NULL AND scheduled <= CURDATE();
     UPDATE todo SET scheduled = NULL WHERE scheduled <= CURDATE() AND recurringDays IS NULL AND recurringMonths IS NULL;
     UPDATE todo SET completed = NULL, scheduled = DATE_ADD(scheduled, INTERVAL recurringDays DAY)
         WHERE scheduled <= CURDATE() AND recurringDays IS NOT NULL;
