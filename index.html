@@ -191,22 +191,27 @@ async function listScheduledTasks() {
     activateProcedure('listScheduledTasks');
 }
 
+async function taskTags(prev_proc) {
+    await callProcedureFull({proc_name: 'listTagsForTask', prev_proc: prev_proc, show_header: false, show_button: false, links: {
+        'Delete': 'removeTag'
+    }});
+    await callProcedureFull({proc_name: 'addTagToTodo'});
+    const id = document.querySelector(`#${prev_proc}_id`);
+    const addTag = document.querySelector('#addTagToTodo_todoId');
+    prefillForms();
+    activateProcedure('listTagsForTask');
+    addTag.value = id.value;
+}
+
 async function displayTodo() {
     await callProcedureFull({proc_name: 'displayTodo', show_header: false, output_settings: {
         details: {trusted_content: true}
     }});
-    await callProcedureFull({proc_name: 'listTagsForTask', prev_proc: 'displayTodo', show_header: false, show_button: false, links: {
-        'Delete': 'removeTag'
-    }});
-    await callProcedureFull({proc_name: 'addTagToTodo'});
+    await taskTags('displayTodo');
     await callProcedureFull({proc_name: 'markCompleted', prev_proc: 'displayTodo', show_header: false});
     await callProcedureFull({proc_name: 'toggleFocus', prev_proc: 'displayTodo', show_header: false});
-    const displayTodo = document.querySelector('#displayTodo_id');
-    const addTag = document.querySelector('#addTagToTodo_todoId');
     prefillForms();
     activateProcedure('displayTodo');
-    activateProcedure('listTagsForTask');
-    addTag.value = displayTodo.value;
 }
 
 async function modifyTodo() {
@@ -214,6 +219,7 @@ async function modifyTodo() {
     await callProcedureFull({proc_name: 'modifyTodo', show_header: true});
     prefillForms();
     activateProcedure('showTodo');
+    await taskTags('modifyTodo');
 }
 
 async function onLoad() {
