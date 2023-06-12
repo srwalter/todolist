@@ -86,12 +86,12 @@ function format_task(reference, links, row, first, column_names) {
     var tr = document.createElement('tr');
 
     let cb;
+    let input;
     if (column_names.length > 1) {
         const td = document.createElement('td');
         tr.appendChild(td);
         cb = document.createElement('td');
         tr.appendChild(cb);
-        let input;
         if (!first) {
             td.setAttribute('class', 'handle');
             td.setAttribute('style', 'cursor: move; width: 0px');
@@ -283,7 +283,7 @@ async function onLoad() {
     <body onload="onLoad();">
     <div class="container body-content">
         <input type="hidden" id="pagination_offset" value="0" />
-        <input type="hidden" id="pagination_count" value="2" />
+        <input type="hidden" id="pagination_count" value="20" />
         <h2>TODO</h2>
         <a href="index.html">Home</a><br/>
         <div class="btn-group">
@@ -295,7 +295,7 @@ async function onLoad() {
             <li><a href="?proc=listProjects">List Projects</a></li>
             <li><a href="?proc=listScheduledTasks">List Scheduled</a></li>
             <li><a href="?proc=listCompletedTasks">Show Completed</a></li>
-            <li><a href="?proc=listTodos">List Task</a></li>
+            <li><a href="?proc=listTodos">List Tasks</a></li>
             <li><a href="?proc=addTagsToTodos&autosubmit=listUntaggedTasks">Tag Tasks</a></li>
             <li><a href="?proc=createTag">Create Tag</a></li>
           </ul>
