@@ -210,7 +210,7 @@ async function taskTags(prev_proc) {
     prefillForms();
     activateProcedure('listTagsForTask');
 
-    const id = wtb_query(prev_proc, id);
+    const id = wtb_query(prev_proc, 'id');
     const addTag = wtb_query('addTagToTodo', 'todoId');
     addTag.value = id.value;
 }
