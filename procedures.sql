@@ -287,9 +287,17 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS createReflist //
-CREATE PROCEDURE createReflist (name VARCHAR(255), details TEXT, OUT reflistId INT)
+CREATE PROCEDURE createReflist (name VARCHAR(255), newLibrary VARCHAR(255), listLibraries_existingLibrary VARCHAR(255), details TEXT, OUT reflistId INT)
 BEGIN
-    INSERT INTO reflist (name, details) VALUES (name, details);
+    DECLARE library VARCHAR(255);
+
+    IF (newLibrary IS NOT NULL) THEN
+        SET library = newLibrary;
+    ELSE
+        SET library = listLibraries_existingLibrary;
+    END IF;
+
+    INSERT INTO reflist (name, details, library) VALUES (name, details, library);
     SET reflistId = LAST_INSERT_ID();
 END //
 
@@ -314,7 +322,7 @@ END //
 DROP PROCEDURE IF EXISTS listLibraries //
 CREATE PROCEDURE listLibraries ()
 BEGIN
-    SELECT DISTINCT library, library AS _library FROM reflist WHERE library IS NOT NULL;
+    SELECT DISTINCT library, library AS _library FROM reflist;
 END //
 
 DROP PROCEDURE IF EXISTS modifyReflist //
