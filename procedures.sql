@@ -130,7 +130,7 @@ END //
 DROP PROCEDURE IF EXISTS listInboxTasks //
 CREATE PROCEDURE listInboxTasks ()
 BEGIN
-    SELECT * FROM uncompletedTodo WHERE _state IS NULL AND _scheduled IS NULL;
+    SELECT * FROM uncompletedTodo WHERE _state IS NULL;
 END //
 
 DROP PROCEDURE IF EXISTS listFocusTasks //
