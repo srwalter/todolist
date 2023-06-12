@@ -84,20 +84,23 @@ function reorderTasks(proc, reference) {
 function format_task(reference, links, row, first, column_names) {
     var tr = document.createElement('tr');
 
-    const td = document.createElement('td');
-    tr.appendChild(td);
-    const cb = document.createElement('td');
-    tr.appendChild(cb);
-    let input;
-    if (!first) {
-        td.setAttribute('class', 'handle');
-        td.setAttribute('style', 'cursor: move; width: 0px');
-        td.textContent = '::';
+    let cb;
+    if (column_names.length > 1) {
+        const td = document.createElement('td');
+        tr.appendChild(td);
+        cb = document.createElement('td');
+        tr.appendChild(cb);
+        let input;
+        if (!first) {
+            td.setAttribute('class', 'handle');
+            td.setAttribute('style', 'cursor: move; width: 0px');
+            td.textContent = '::';
 
-        input = document.createElement('input');
-        cb.appendChild(input);
-        input.setAttribute('type', 'checkbox');
-        cb.setAttribute('style', 'width: 0px');
+            input = document.createElement('input');
+            cb.appendChild(input);
+            input.setAttribute('type', 'checkbox');
+            cb.setAttribute('style', 'width: 0px');
+        }
     }
 
     for (let i=0; i < row.length; i++) {

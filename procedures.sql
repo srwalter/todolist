@@ -168,7 +168,15 @@ END //
 DROP PROCEDURE IF EXISTS listTasksForProject //
 CREATE PROCEDURE listTasksForProject (listProjects_project VARCHAR(255))
 BEGIN
-    SELECT *, _focus2 AS _focus FROM uncompletedTodo WHERE project = listProjects_project;
+    Select 'Next';
+    SELECT *, _focus2 AS _focus FROM uncompletedTodo WHERE project = listProjects_project AND _state = 'Next';
+    Select 'Later';
+    SELECT *, _focus2 AS _focus FROM uncompletedTodo WHERE project = listProjects_project AND _state = 'Later';
+    Select 'Waiting';
+    SELECT *, _focus2 AS _focus, _scheduled AS scheduled
+        FROM uncompletedTodo WHERE project = listProjects_project AND _state = 'Waiting';
+    Select 'Someday';
+    SELECT *, _focus2 AS _focus FROM uncompletedTodo WHERE project = listProjects_project AND _state = 'Someday';
 END //
 
 DROP PROCEDURE IF EXISTS addTaskToProject //
