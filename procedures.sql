@@ -49,7 +49,7 @@ END //
 DROP PROCEDURE IF EXISTS listProjects //
 CREATE PROCEDURE listProjects ()
 BEGIN
-    SELECT DISTINCT project, project AS _project FROM todo;
+    SELECT DISTINCT project, project AS _project FROM todo WHERE project IS NOT NULL;
 END //
 
 DROP PROCEDURE IF EXISTS modifyTodo //

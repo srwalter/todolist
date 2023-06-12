@@ -13,6 +13,12 @@
         <script>
 var database = "todo";
 
+async function createTodo() {
+    await callProcedure('createTodo');
+    wtb_query('createTodo', 'state').value = '';
+    wtb_query('createTodo', 'project').value = '';
+}
+
 async function listReferences() {
     const proc = 'listReferences';
     await callProcedureFull({proc_name: proc, format_row: (row, first, column_names) => {
@@ -250,6 +256,8 @@ async function onLoad() {
             await displayTodo();
         } else if (q['proc'] == 'modifyTodo') {
             await modifyTodo();
+        } else if (q['proc'] == 'createTodo') {
+            await createTodo();
         } else {
             await callProcedure(q['proc']);
         }
