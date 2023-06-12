@@ -116,8 +116,15 @@ CREATE VIEW uncompletedTodo AS
 DROP PROCEDURE IF EXISTS listTasksInState //
 CREATE PROCEDURE listTasksInState (listTags_tagId INT, state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'))
 BEGIN
-    SELECT uncompletedTodo.*, _focus2 AS _focus FROM uncompletedTodo LEFT JOIN todotags ON _id = todotags.todoId
-        WHERE _state = state AND (tagId = listTags_tagId OR tagId IS NULL) ORDER BY _focus2 DESC, project, _sort;
+    IF (state = 'Waiting') THEN
+        SELECT uncompletedTodo.*, _focus2 AS _focus, _scheduled AS scheduled FROM uncompletedTodo
+            LEFT JOIN todotags ON _id = todotags.todoId
+            WHERE _state = state AND (tagId = listTags_tagId OR tagId IS NULL) ORDER BY _focus2 DESC, project, scheduled, _sort;
+    ELSE
+        SELECT uncompletedTodo.*, _focus2 AS _focus FROM uncompletedTodo
+            LEFT JOIN todotags ON _id = todotags.todoId
+            WHERE _state = state AND (tagId = listTags_tagId OR tagId IS NULL) ORDER BY _focus2 DESC, project, _sort;
+    END IF;
 END //
 
 DROP PROCEDURE IF EXISTS listUntaggedTasks //
