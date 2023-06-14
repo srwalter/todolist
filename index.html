@@ -158,13 +158,14 @@ function format_task(reference, links, row, first, column_names) {
     return tr;
 }
 
-async function listTasks(proc, params = {show_button: false}) {
-    const show_button = params.show_button;
+async function listTasks(proc, params = {show_button: false, activate: true}) {
+    const show_button = !!params.show_button;
+    const activate = params.activate;
 
     const links = {
         'Edit': 'modifyTodo',
     };
-    await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button, show_header: true, after_results:
+    await callProcedureFull({proc_name: proc, links: links, activate: activate, show_button: show_button, show_header: true, after_results:
     () => {
         $(`#results_${proc} tbody`).sortable({
             handle: ".handle",
@@ -189,7 +190,7 @@ async function listTasksForProject() {
     await listTasks('listTasksForProject', {show_button: true});
 }
 async function listFocusTasks() {
-    await listTasks('listFocusTasks');
+    await listTasks('listFocusTasks', {activate: false});
 }
 async function listTodos() {
     const links = {
@@ -284,9 +285,11 @@ async function onLoad() {
         prefillForms();
     } else {
         await callProcedure('quickEntry');
-        await listTasks('listInboxTasks');
+        await listTasks('listInboxTasks', {activate: false});
         await listFocusTasks();
         await listTasksInState();
+        activateProcedure('listInboxTasks');
+        activateProcedure('listFocusTasks');
     }
 }
         </script>
