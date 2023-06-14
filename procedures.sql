@@ -222,6 +222,12 @@ BEGIN
     UPDATE todo SET focus = !focus WHERE todo.id = id;
 END //
 
+DROP PROCEDURE IF EXISTS markNext //
+CREATE PROCEDURE markNext (id INT)
+BEGIN
+    UPDATE todo SET state = 'Next' WHERE todo.id = id;
+END //
+
 DROP PROCEDURE IF EXISTS modifySort //
 CREATE PROCEDURE modifySort (id INT, sort INT, isReference INT)
 BEGIN

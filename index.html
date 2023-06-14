@@ -23,7 +23,7 @@ async function createTodo() {
 async function listReferences() {
     const proc = 'listReferences';
     await callProcedureFull({proc_name: proc, format_row: (row, first, column_names) => {
-        return format_task(true, {}, row, first, column_names);
+        return format_task(false, true, {}, row, first, column_names);
     }, after_results: () => {
         $(`#results_${proc} tbody`).sortable({
             handle: ".handle",
@@ -82,7 +82,7 @@ function reorderTasks(proc, reference) {
     }
 }
 
-function format_task(reference, links, row, first, column_names) {
+function format_task(inbox, reference, links, row, first, column_names) {
     var tr = document.createElement('tr');
 
     let cb;
@@ -152,15 +152,25 @@ function format_task(reference, links, row, first, column_names) {
             }
 
             format_links(tr, 'index.html', links, row, first, column_names);
+
+            if (inbox) {
+                const next = document.createElement('button');
+                tr.appendChild(next);
+                next.textContent = 'Next';
+                next.addEventListener('click', (event) => {
+                    sql_exec(`CALL markNext(${id})`);
+                });
+            }
         }
     }
 
     return tr;
 }
 
-async function listTasks(proc, params = {show_button: false, activate: true}) {
+async function listTasks(proc, params = {show_button: false, activate: true, inbox: false}) {
     const show_button = !!params.show_button;
-    const activate = params.activate;
+    const activate = !!params.activate;
+    const inbox = !!params.inbox;
 
     const links = {
         'Edit': 'modifyTodo',
@@ -175,7 +185,7 @@ async function listTasks(proc, params = {show_button: false, activate: true}) {
             }
         }).disableSelection();
     }, format_row: (row, first, column_names) => {
-        return format_task(false, links, row, first, column_names);
+        return format_task(inbox, false, links, row, first, column_names);
     }});
 }
 
@@ -285,7 +295,7 @@ async function onLoad() {
         prefillForms();
     } else {
         await callProcedure('quickEntry');
-        await listTasks('listInboxTasks', {activate: false});
+        await listTasks('listInboxTasks', {activate: false, inbox: true});
         await listFocusTasks();
         await listTasksInState();
         activateProcedure('listInboxTasks');
