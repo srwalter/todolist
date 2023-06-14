@@ -35,21 +35,21 @@ async function listReferences() {
     }});
 }
 
-async function listReflistsGeneric(proc_name) {
-    await callProcedureFull({proc_name: proc_name, activate: true, show_button: false, links: {
+async function listReflistsGeneric(proc_name, activate) {
+    await callProcedureFull({proc_name: proc_name, activate: activate, show_button: false, links: {
         'Show': ['listReferences', true],
         'Edit': 'modifyReflist'
     }});
 }
 
 async function listReflistsForLibrary() {
-    await listReflistsGeneric('listReflistsForLibrary');
+    await listReflistsGeneric('listReflistsForLibrary', false);
 }
 
 async function listLibraries() {
-    await listReflistsGeneric('listReflists');
+    await listReflistsGeneric('listReflists', true);
     await callProcedureFull({proc_name: 'listLibraries', activate: true, show_button: false, links: {
-        'Show': 'listReflistsForLibrary'
+        'Show': ['listReflistsForLibrary', true]
     }});
 }
 
@@ -169,7 +169,7 @@ function format_task(inbox, reference, links, row, first, column_names) {
 
 async function listTasks(proc, params = {show_button: false, activate: true, inbox: false}) {
     const show_button = !!params.show_button;
-    const activate = !!params.activate;
+    const activate = (params.activate == undefined) ? true : params.activate;
     const inbox = !!params.inbox;
 
     const links = {
