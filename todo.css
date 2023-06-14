@@ -1,3 +1,29 @@
 .wtb-link {
     width: 0px;
 }
+
+#results_listInboxTasks tr :nth-child(10) {
+    display: none;
+}
+
+#results_listInboxTasks tr :nth-child(11) {
+    display: none;
+}
+
+@media (max-width: 800px) {
+    #results_listFocusTasks tr :nth-child(10) {
+        display: none;
+    }
+    #results_listTasksInState tr :nth-child(10) {
+        display: none;
+    }
+}
+
+@media (max-width: 700px) {
+    #results_listFocusTasks tr :nth-child(11) {
+        display: none;
+    }
+    #results_listTasksInState tr :nth-child(11) {
+        display: none;
+    }
+}
