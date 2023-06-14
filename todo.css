@@ -2,6 +2,10 @@
     width: 0px;
 }
 
+.title-click:hover {
+    cursor: pointer;
+}
+
 #results_listInboxTasks tr :nth-child(10) {
     display: none;
 }

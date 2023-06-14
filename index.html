@@ -125,6 +125,12 @@ function format_task(reference, links, row, first, column_names) {
                 }
             });
 
+            const title = tr.querySelector('[data-wtb-column="title"]');
+            title.setAttribute('class', 'title-click');
+            title.addEventListener('click', (event) => {
+                displayTodo(id);
+            });
+
             const completed = tr.querySelector('[data-wtb-column="_completed"]');
             if (completed && parseInt(completed.textContent)) {
                 input.checked = true;
@@ -157,7 +163,6 @@ async function listTasks(proc, params = {show_button: false}) {
 
     const links = {
         'Edit': 'modifyTodo',
-        'Details': 'displayTodo',
     };
     await callProcedureFull({proc_name: proc, links: links, activate: true, show_button: show_button, show_header: true, after_results:
     () => {
@@ -216,14 +221,19 @@ async function taskTags(prev_proc) {
     addTag.value = id.value;
 }
 
-async function displayTodo() {
+async function displayTodo(id = undefined) {
+    clearUI();
     await callProcedureFull({proc_name: 'displayTodo', show_header: false, output_settings: {
         details: {trusted_content: true}
     }});
     await taskTags('displayTodo');
     await callProcedureFull({proc_name: 'markCompleted', prev_proc: 'displayTodo', show_header: false});
     await callProcedureFull({proc_name: 'toggleFocus', prev_proc: 'displayTodo', show_header: false});
-    prefillForms();
+    if (id) {
+        wtb_query('displayTodo', 'id').value = id;
+    } else {
+        prefillForms();
+    }
     activateProcedure('displayTodo');
 }
 
