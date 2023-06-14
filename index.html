@@ -241,8 +241,8 @@ async function modifyTodo() {
     await callProcedureOutput({proc_name: 'showTodo', prev_proc: 'modifyTodo', outputs: ['modifyTodo'], show_button: false, show_header: false});
     await callProcedureFull({proc_name: 'modifyTodo', show_header: true});
     prefillForms();
-    activateProcedure('showTodo');
     await taskTags('modifyTodo');
+    activateProcedure('showTodo');
 }
 
 async function onLoad() {
@@ -275,6 +275,7 @@ async function onLoad() {
             await displayTodo();
         } else if (q['proc'] == 'modifyTodo') {
             await modifyTodo();
+            return;
         } else if (q['proc'] == 'createTodo') {
             await createTodo();
         } else {
