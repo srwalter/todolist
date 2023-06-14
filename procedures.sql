@@ -170,7 +170,7 @@ DROP PROCEDURE IF EXISTS listScheduledTasks //
 CREATE PROCEDURE listScheduledTasks ()
 BEGIN
     SELECT id AS _id, sort AS _sort, focus AS _focus, 0 AS _dueNow, title, scheduled, recurringDays, recurringMonths, completed AS _completed
-        FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY sort;
+        FROM todo WHERE todo.scheduled IS NOT NULL ORDER BY scheduled;
 END //
 
 DROP PROCEDURE IF EXISTS listTasksForProject //
