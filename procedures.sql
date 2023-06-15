@@ -163,7 +163,7 @@ CREATE PROCEDURE listCompletedTasks ()
 BEGIN
     SELECT id AS _id, sort AS _sort, 0 AS _focus, 0 AS _dueNow, hasDetails(details) AS _hasDetails, title, completed,
         1 as _completed
-        FROM todo WHERE completed IS NOT NULL ORDER BY completed;
+        FROM todo WHERE completed IS NOT NULL ORDER BY completed DESC;
 END //
 
 DROP PROCEDURE IF EXISTS listScheduledTasks //
