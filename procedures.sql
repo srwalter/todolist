@@ -155,7 +155,7 @@ BEGIN
         WHERE scheduled <= CURDATE() AND recurringMonths IS NOT NULL;
     COMMIT;
 
-    SELECT *, 0 AS _focus FROM uncompletedTodo WHERE _focus2 = 1;
+    SELECT *, 0 AS _focus FROM uncompletedTodo WHERE _focus2 = 1 ORDER BY _sort;
 END //
 
 DROP PROCEDURE IF EXISTS listCompletedTasks //
