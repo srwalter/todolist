@@ -128,6 +128,34 @@ BEGIN
     END IF;
 END //
 
+DROP PROCEDURE IF EXISTS listAllInState //
+CREATE PROCEDURE listAllInState (state ENUM('Next', 'Later', 'Waiting', 'Someday', 'Archive'))
+BEGIN
+    IF (state = 'Waiting') THEN
+        SELECT uncompletedTodo.*, _focus2 AS _focus, _scheduled AS scheduled, tags.tag FROM uncompletedTodo
+            LEFT JOIN todotags ON _id = todotags.todoId
+            JOIN tags ON todotags.tagId = tags.id
+            WHERE _state = state ORDER BY scheduled, _focus2 DESC, tags.tag, project, _sort;
+    ELSE
+        SELECT uncompletedTodo.*, _focus2 AS _focus, tags.tag FROM uncompletedTodo
+            LEFT JOIN todotags ON _id = todotags.todoId
+            JOIN tags ON todotags.tagId = tags.id
+            WHERE _state = state ORDER BY _focus2 DESC, tags.tag, project, _sort;
+    END IF;
+END //
+
+DROP PROCEDURE IF EXISTS weeklyReview //
+CREATE PROCEDURE weeklyReview ()
+BEGIN
+    CALL listInboxTasks();
+    SELECT 'Next';
+    CALL listAllInState('Next');
+    SELECT 'Later';
+    CALL listAllInState('Later');
+    SELECT 'Waiting';
+    CALL listAllInState('Waiting');
+END //
+
 DROP PROCEDURE IF EXISTS listUntaggedTasks //
 CREATE PROCEDURE listUntaggedTasks ()
 BEGIN
