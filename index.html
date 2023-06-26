@@ -161,6 +161,12 @@ function format_task(inbox, reference, links, row, first, column_names) {
                 next.addEventListener('click', (event) => {
                     sql_exec(`CALL markNext(${id})`);
                 });
+                const focus = document.createElement('button');
+                tr.appendChild(focus);
+                focus.textContent = 'Focus';
+                focus.addEventListener('click', (event) => {
+                    sql_exec(`CALL markFocus(${id})`);
+                });
             }
         }
     }
