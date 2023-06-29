@@ -23,8 +23,11 @@ async function createTodo() {
 
 async function listReferences() {
     const proc = 'listReferences';
+    const links = {
+        'Edit': 'modifyReference'
+    };
     await callProcedureFull({proc_name: proc, format_row: (row, first, column_names) => {
-        return format_task(false, true, {}, row, first, column_names);
+        return format_task(false, true, links, row, first, column_names);
     }, after_results: () => {
         $(`#results_${proc} tbody`).sortable({
             handle: ".handle",

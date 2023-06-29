@@ -398,3 +398,9 @@ BEGIN
         WHERE reflistId = _reflistId ORDER BY sort;
 END //
 
+DROP PROCEDURE IF EXISTS modifyReference //
+CREATE PROCEDURE modifyReference (refId INT, title VARCHAR(255), details TEXT, OUT result VARCHAR(255))
+BEGIN
+    UPDATE reference AS r SET r.title = title, r.details = details WHERE r.id = refId;
+    SET result = "Success";
+END //
