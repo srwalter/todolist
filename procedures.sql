@@ -399,8 +399,8 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS modifyReference //
-CREATE PROCEDURE modifyReference (refId INT, title VARCHAR(255), details TEXT, OUT result VARCHAR(255))
+CREATE PROCEDURE modifyReference (_id INT, title VARCHAR(255), details TEXT, OUT result VARCHAR(255))
 BEGIN
-    UPDATE reference AS r SET r.title = title, r.details = details WHERE r.id = refId;
+    UPDATE reference AS r SET r.title = title, r.details = details WHERE r.id = _id;
     SET result = "Success";
 END //
