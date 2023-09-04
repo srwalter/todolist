@@ -24,7 +24,7 @@ DROP PROCEDURE IF EXISTS listTodos //
 CREATE PROCEDURE listTodos (paginate_count INT, paginate_offset INT, OUT paginate_total INT)
 BEGIN
     SELECT id AS _id, title, state, due
-        FROM todo WHERE completed IS NULL ORDER BY state, project, sort LIMIT paginate_count OFFSET paginate_offset;
+        FROM todo WHERE completed IS NULL ORDER BY due DESC, state, project, sort LIMIT paginate_count OFFSET paginate_offset;
     SELECT COUNT(*) INTO paginate_total FROM todo WHERE completed IS NULL;
 END //
 
