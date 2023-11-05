@@ -327,6 +327,36 @@ BEGIN
     SET result = "Success";
 END //
 
+DROP PROCEDURE IF EXISTS deferTask //
+CREATE PROCEDURE deferTask (id INT, deferTo DATE, OUT result VARCHAR(255))
+BEGIN
+    UPDATE todo SET
+        focus = 0,
+        state = "Waiting",
+        scheduled = deferTo
+        WHERE todo.id = id;
+    SET result = "Success";
+END //
+
+DROP PROCEDURE IF EXISTS deferTasks //
+CREATE PROCEDURE deferTasks (_id JSON, deferTo DATE, OUT result VARCHAR(255))
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE array_length INT;
+    DECLARE str VARCHAR(255);
+    DECLARE curr INT;
+
+    SET array_length = JSON_LENGTH(_id);
+
+    WHILE i <= array_length DO
+        SET str = JSON_EXTRACT(_id, CONCAT('$[', i-1, ']'));
+        SET curr = CAST(REPLACE(str, '"', '') AS UNSIGNED);
+        CALL deferTask(curr, deferTo, result);
+
+        SET i = i + 1;
+    END WHILE;
+END //
+
 DROP PROCEDURE IF EXISTS createReflist //
 CREATE PROCEDURE createReflist (name VARCHAR(255), newLibrary VARCHAR(255), listLibraries_existingLibrary VARCHAR(255), details TEXT, OUT reflistId INT)
 BEGIN

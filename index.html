@@ -62,6 +62,11 @@ async function addTagsToTodos() {
     await callProcedure('addTagToTodos', false);
 }
 
+async function deferTasks() {
+    await callProcedureSelectMany('listFocusTasks', 'deferTasks');
+    await callProcedure('deferTasks', false);
+}
+
 async function listProjects() {
     const links = {
         'Show': 'listTasksForProject',
@@ -298,6 +303,8 @@ async function onLoad() {
             await listReflistsForLibrary();
         } else if (q['proc'] == 'addTagsToTodos') {
             await addTagsToTodos();
+        } else if (q['proc'] == 'deferTasks') {
+            await deferTasks();
         } else if (q['proc'] == 'displayTodo') {
             await displayTodo();
         } else if (q['proc'] == 'modifyTodo') {
@@ -339,6 +346,7 @@ async function onLoad() {
             <li><a href="?proc=listTodos">List Tasks</a></li>
             <li><a href="?proc=addTagsToTodos&autosubmit=listUntaggedTasks">Tag Tasks</a></li>
             <li><a href="?proc=createTag">Create Tag</a></li>
+            <li><a href="?proc=deferTasks&autosubmit=listFocusTasks">Defer Tasks</a></li>
           </ul>
         </div>
         <div class="btn-group">
