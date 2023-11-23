@@ -37,6 +37,9 @@ async function listReferences() {
             }
         }).disableSelection();
     }});
+    await callProcedure('createReference', false);
+    await prefillForms();
+    wtb_query('createReference', 'reflistId').value = wtb_query('listReferences', 'reflistId').value;
 }
 
 async function listReflistsGeneric(proc_name, activate) {
