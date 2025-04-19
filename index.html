@@ -16,37 +16,45 @@
 var database = "todo";
 
 async function createTodo() {
-    await callProcedure('createTodo');
-    wtb_query('createTodo', 'state').value = '';
-    wtb_query('createTodo', 'project').value = '';
+    await new WTB('createTodo').generate();
+    WTB.query('createTodo', 'state').value = '';
+    WTB.query('createTodo', 'project').value = '';
 }
 
 async function listReferences() {
     const proc = 'listReferences';
-    const links = {
-        'Edit': 'modifyReference'
-    };
-    await callProcedureFull({proc_name: proc, format_row: (row, first, column_names) => {
-        return format_task(false, true, links, row, first, column_names);
-    }, after_results: () => {
-        $(`#results_${proc} tbody`).sortable({
-            handle: ".handle",
-            axis: 'y',
-            stop: function(event, ui) {
-                reorderTasks(proc, true);
-            }
-        }).disableSelection();
-    }});
-    await callProcedure('createReference', false);
-    await prefillForms();
-    wtb_query('createReference', 'reflistId').value = wtb_query('listReferences', 'reflistId').value;
+    let x = new WTB(proc)
+    await x.addLink('Edit', 'modifyReference')
+        .rowFormatter((row, first, column_names) => {
+            return format_task(false, true, x.params.links, row, first, column_names);
+        })
+        .afterResults(() => {
+            $(`#results_${proc} tbody`).sortable({
+                handle: ".handle",
+                axis: 'y',
+                stop: function(event, ui) {
+                    reorderTasks(proc, true);
+                }
+            }).disableSelection();
+        })
+        .generate();
+    await new WTB('createReference').generate();
+    await WTB.prefillForms();
+    WTB.query('createReference', 'reflistId').value =
+        WTB.query('listReferences', 'reflistId').value;
 }
 
 async function listReflistsGeneric(proc_name, activate) {
-    await callProcedureFull({proc_name: proc_name, activate: activate, show_button: false, links: {
-        'Show': ['listReferences', true],
-        'Edit': 'modifyReflist'
-    }});
+    let x = new WTB(proc_name)
+        .hideButton()
+        .addLink('Show', ['listReferences', true])
+        .addLink('Edit', 'modifyReflist');
+
+    if (activate) {
+        await x.activate();
+    } else {
+        await x.generate();
+    }
 }
 
 async function listReflistsForLibrary() {
@@ -55,26 +63,30 @@ async function listReflistsForLibrary() {
 
 async function listLibraries() {
     await listReflistsGeneric('listReflists', true);
-    await callProcedureFull({proc_name: 'listLibraries', activate: true, show_button: false, links: {
-        'Show': ['listReflistsForLibrary', true]
-    }});
+    await new WTB('listLibraries')
+        .hideButton()
+        .addLink('Show', ['listReflistsForLibrary', true])
+        .activate();
 }
 
 async function addTagsToTodos() {
-    await callProcedureSelectMany('listUntaggedTasks', 'addTagToTodos');
-    await callProcedure('addTagToTodos', false);
+    let x = new WTB('addTagsToTodos')
+    await x.selectMany('listUntaggedTasks').generate();
+    await x.generate();
 }
 
 async function deferTasks() {
-    await callProcedureSelectMany('listFocusTasks', 'deferTasks');
-    await callProcedure('deferTasks', false);
+    let x = new WTB('deferTasks')
+    await x.selectMany('listFocusTasks').generate();
+    await x.generate();
 }
 
 async function listProjects() {
-    const links = {
-        'Show': 'listTasksForProject',
-    };
-    await callProcedureFull({proc_name: 'listProjects', links: links, activate: true, show_button: false, show_header: true});
+    await new WTB('listProjects')
+        .addLink('Show', 'listTasksForProject')
+        .hideButton()
+        .showHeader()
+        .activate();
 }
 
 function reorderTasks(proc, reference) {
@@ -190,21 +202,29 @@ async function listTasks(proc, params = {show_button: false, activate: true, inb
     const activate = (params.activate == undefined) ? true : params.activate;
     const inbox = !!params.inbox;
 
-    const links = {
-        'Edit': 'modifyTodo',
-    };
-    await callProcedureFull({proc_name: proc, links: links, activate: activate, show_button: show_button, show_header: true, after_results:
-    () => {
-        $(`#results_${proc} tbody`).sortable({
-            handle: ".handle",
-            axis: 'y',
-            stop: function(event, ui) {
-                reorderTasks(proc, false);
-            }
-        }).disableSelection();
-    }, format_row: (row, first, column_names) => {
-        return format_task(inbox, false, links, row, first, column_names);
-    }});
+    let x = new WTB(proc)
+        .addLink('Edit', 'modifyTodo')
+        .showHeader()
+        .afterResults(() => {
+            $(`#results_${proc} tbody`).sortable({
+                handle: ".handle",
+                axis: 'y',
+                stop: function(event, ui) {
+                    reorderTasks(proc, false);
+                }
+            }).disableSelection();
+        }).rowFormatter((row, first, column_names) => {
+            return format_task(inbox, false, x.params.links, row, first, column_names);
+        });
+
+    if (!show_button) {
+        x.hideButton();
+    }
+    if (activate) {
+        await x.activate();
+    } else {
+        await x.generate();
+    }
 }
 
 async function weeklyReview() {
@@ -212,7 +232,7 @@ async function weeklyReview() {
 }
 
 async function listTasksForProject() {
-    const values = parseQueryString(window.location.search);
+    const values = WTB.parseQueryString(window.location.search);
     const project = values['listTasksForProject_project'];
     let a = document.createElement('a');
     const div = document.querySelector('#wheresthebeef');
@@ -225,11 +245,12 @@ async function listFocusTasks() {
     await listTasks('listFocusTasks', {activate: false});
 }
 async function listTodos() {
-    const links = {
-        'Edit': 'modifyTodo',
-        'Details': 'displayTodo',
-    };
-    await callProcedureFull({proc_name: 'listTodos', links: links, activate: true, show_button: false, show_header: true});
+    await new WTB('listTodos')
+        .addLink('Edit', 'modifyTodo')
+        .addLink('Details', 'displayTodo')
+        .hideButton()
+        .showHeader()
+        .activate();
 }
 async function listTasksInState() {
     await listTasks('listTasksInState', {show_button: true});
@@ -242,47 +263,68 @@ async function listScheduledTasks() {
 }
 
 async function taskTags(prev_proc) {
-    await callProcedureFull({proc_name: 'listTagsForTask', prev_proc: prev_proc, show_header: false, show_button: false, links: {
-        'Delete': 'removeTag'
-    }});
-    await callProcedureFull({proc_name: 'addTagToTodo'});
-    prefillForms();
-    activateProcedure('listTagsForTask');
+    await new WTB('listTagsForTask')
+        .chain(prev_proc)
+        .hideHeader()
+        .hideButton()
+        .addLink('Delete', 'removeTag')
+        .generate();
+    await new WTB('addTagToTodo').generate();
+    await WTB.prefillForms();
+    WTB.activateProcedure('listTagsForTask');
 
-    const id = wtb_query(prev_proc, 'id');
-    const addTag = wtb_query('addTagToTodo', 'todoId');
+    const id = WTB.query(prev_proc, 'id');
+    const addTag = WTB.query('addTagToTodo', 'todoId');
     addTag.value = id.value;
 }
 
 async function displayTodo(id = undefined) {
-    clearUI();
-    await callProcedureFull({proc_name: 'displayTodo', show_header: false, output_settings: {
-        details: {trusted_content: true}
-    }});
+    WTB.clear();
+    await new WTB('displayTodo')
+        .outputSettings({details: {trusted_content: true}})
+        .generate();
     await taskTags('displayTodo');
-    await callProcedureFull({proc_name: 'markCompleted', prev_proc: 'displayTodo', show_header: false});
-    await callProcedureFull({proc_name: 'toggleFocus', prev_proc: 'displayTodo', show_header: false});
+    await new WTB('markCompleted')
+        .chain('displayTodo')
+        .hideHeader()
+        .generate();
+    await new WTB('toggleFocus')
+        .chain('displayTodo')
+        .hideHeader()
+        .generate();
+
     if (id) {
-        wtb_query('displayTodo', 'id').value = id;
+        WTB.query('displayTodo', 'id').value = id;
     } else {
-        prefillForms();
+        await WTB.prefillForms();
     }
-    activateProcedure('displayTodo');
+    WTB.activateProcedure('displayTodo');
 }
 
 async function modifyTodo() {
-    await callProcedureOutput({proc_name: 'showTodo', prev_proc: 'modifyTodo', outputs: ['modifyTodo'], show_button: false, show_header: false});
-    await callProcedureFull({proc_name: 'modifyTodo', show_header: true});
-    prefillForms();
+    let modifyTodo = new WTB('modifyTodo')
+        .showHeader();
+    // This is more than a little clever.  Rather than rely on all the values
+    // coming in the query string as we usually do, call showTodo to retrieve the
+    // values.  We need to both chain from modifyTodo (to get the ID value) as
+    // well as use modifyTodo as the output form.
+    await new WTB('showTodo')
+        .chain('modifyTodo')
+        .addOutput(modifyTodo)
+        .hideButton()
+        .hideHeader()
+        .generate();
+    await modifyTodo.generate();
+    WTB.prefillForms();
     await taskTags('modifyTodo');
-    activateProcedure('showTodo');
+    WTB.activateProcedure('showTodo');
 }
 
 async function onLoad() {
     if (!await checkLogin()) {
         return;
     }
-    var q = parseQueryString(window.location.search);
+    var q = WTB.parseQueryString(window.location.search);
     if (q['proc']) {
         if (q['proc'] == 'listTodos') {
             await listTodos();
@@ -316,16 +358,16 @@ async function onLoad() {
         } else if (q['proc'] == 'createTodo') {
             await createTodo();
         } else {
-            await callProcedure(q['proc']);
+            await new WTB(q['proc']).generate();
         }
         prefillForms();
     } else {
-        await callProcedure('quickEntry');
+        await new WTB('quickEntry').generate();
         await listTasks('listInboxTasks', {activate: false, inbox: true});
         await listFocusTasks();
         await listTasksInState();
-        activateProcedure('listInboxTasks');
-        activateProcedure('listFocusTasks');
+        WTB.activateProcedure('listInboxTasks');
+        WTB.activateProcedure('listFocusTasks');
     }
 }
         </script>
