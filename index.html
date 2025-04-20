@@ -97,7 +97,7 @@ function reorderTasks(proc, reference) {
 
         if (sort < lastval) {
             sort = lastval + 1;
-            sql_exec(`CALL modifySort(${id}, ${sort}, ${reference})`);
+            WTB.exec(`CALL modifySort(${id}, ${sort}, ${reference})`);
         }
 
         lastval = sort;
@@ -138,9 +138,9 @@ function format_task(inbox, reference, links, row, first, column_names) {
             if (cb) {
                 cb.on('change', () => {
                     if (input.prop('checked')) {
-                        sql_exec(`CALL markCompleted(${id}, ${reference})`);
+                        WTB.exec(`CALL markCompleted(${id}, ${reference})`);
                     } else {
-                        sql_exec(`CALL unmarkCompleted(${id}, ${reference})`);
+                        WTB.exec(`CALL unmarkCompleted(${id}, ${reference})`);
                     }
                 });
             }
@@ -175,12 +175,12 @@ function format_task(inbox, reference, links, row, first, column_names) {
             if (inbox) {
                 // Create "Next" button
                 $('<button>').text('Next').on('click', () => {
-                    sql_exec(`CALL markNext(${id})`);
+                    WTB.exec(`CALL markNext(${id})`);
                 }).appendTo(tr);
 
                 // Create "Focus" button
                 $('<button>').text('Focus').on('click', () => {
-                    sql_exec(`CALL markFocus(${id})`);
+                    WTB.exec(`CALL markFocus(${id})`);
                 }).appendTo(tr);
             }
         }
