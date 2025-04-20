@@ -21,6 +21,16 @@ async function createTodo() {
     WTB.query('createTodo', 'project').value = '';
 }
 
+function sort_results(proc, reference) {
+    $(`#results_${proc} tbody`).sortable({
+        handle: ".handle",
+        axis: 'y',
+        stop: function(event, ui) {
+            reorderTasks(proc, true);
+        }
+    }).disableSelection();
+}
+
 async function listReferences() {
     const proc = 'listReferences';
     let x = new WTB(proc)
@@ -29,13 +39,7 @@ async function listReferences() {
             return format_task(false, true, x.params.links, row, first, column_names);
         })
         .afterResults(() => {
-            $(`#results_${proc} tbody`).sortable({
-                handle: ".handle",
-                axis: 'y',
-                stop: function(event, ui) {
-                    reorderTasks(proc, true);
-                }
-            }).disableSelection();
+            sort_results(proc, true);
         })
         .generate();
     await new WTB('createReference').generate();
@@ -44,28 +48,22 @@ async function listReferences() {
         WTB.query('listReferences', 'reflistId').value;
 }
 
-async function listReflistsGeneric(proc_name, activate) {
-    let x = new WTB(proc_name)
+function listReflistsGeneric(proc_name) {
+    return new WTB(proc_name)
         .hideButton()
         .addLink('Show', ['listReferences', true])
         .addLink('Edit', 'modifyReflist');
-
-    if (activate) {
-        await x.activate();
-    } else {
-        await x.generate();
-    }
 }
 
 async function listReflistsForLibrary() {
-    await listReflistsGeneric('listReflistsForLibrary', false);
+    await listReflistsGeneric('listReflistsForLibrary').generate();
 }
 
 async function listLibraries() {
-    await listReflistsGeneric('listReflists', true);
+    await listReflistsGeneric('listReflists').activate();
     await new WTB('listLibraries')
-        .hideButton()
         .addLink('Show', ['listReflistsForLibrary', true])
+        .hideButton()
         .activate();
 }
 
@@ -90,159 +88,137 @@ async function listProjects() {
 }
 
 function reorderTasks(proc, reference) {
-    const rows = document.querySelectorAll(`#results_${proc} tbody tr`);
-
     let lastval = 0;
-    for (const r of rows) {
-        const id = parseInt(r.querySelector('[data-wtb-column="_id"]').textContent);
-        let sort = parseInt(r.querySelector('[data-wtb-column="_sort"]').textContent);
+
+    // For each row...
+    $(`#results_${proc} tbody tr`).each(function () {
+        const id = parseInt($(this).find('[data-wtb-column="_id"]').text());
+        let sort = parseInt($(this).find('[data-wtb-column="_sort"]').text());
 
         if (sort < lastval) {
-            sort = lastval+1;
+            sort = lastval + 1;
             sql_exec(`CALL modifySort(${id}, ${sort}, ${reference})`);
         }
 
         lastval = sort;
-    }
+    });
 }
 
 function format_task(inbox, reference, links, row, first, column_names) {
-    var tr = document.createElement('tr');
+    let tr = $('<tr>');
 
     let cb;
     let input;
     if (column_names.length > 1) {
-        const td = document.createElement('td');
-        tr.appendChild(td);
-        cb = document.createElement('td');
-        tr.appendChild(cb);
-        if (!first) {
-            td.setAttribute('class', 'handle');
-            td.setAttribute('style', 'cursor: move; width: 0px');
-            td.textContent = '::';
-
-            input = document.createElement('input');
-            cb.appendChild(input);
-            input.setAttribute('type', 'checkbox');
-            cb.setAttribute('style', 'width: 0px');
-        }
+	const td = $('<td>');
+	cb = $('<td>');
+	tr.append(td, cb);
+	if (!first) {
+	    td.addClass('handle')
+	      .css({ cursor: 'move', width: '0px' })
+	      .text('::');
+	    
+	    input = $('<input>', { type: 'checkbox' });
+	    cb.css('width', '0px').append(input);
+	}
     }
 
     for (let i=0; i < row.length; i++) {
         const cell = row[i];
-        format_cell(tr, cell, false, {}, first, column_names[i]);
+        format_cell(tr[0], cell, false, {}, first, column_names[i]);
     }
 
-    const details = document.createElement('td');
-    tr.appendChild(details);
-    details.setAttribute('style', 'width: 0px');
+    // Holder for the "..." details indicator
+    const details = $('<td>').css('width', '0px').appendTo(tr);
 
     if (!first) {
-        const id_elem = tr.querySelector('[data-wtb-column="_id"]');
+        const id_elem = tr.find('[data-wtb-column="_id"]');
         if (id_elem) {
-            const id = parseInt(id_elem.textContent);
-            cb.addEventListener('change', (event) => {
-                if (input.checked) {
-                    sql_exec(`CALL markCompleted(${id}, ${reference})`);
-                } else {
-                    sql_exec(`CALL unmarkCompleted(${id}, ${reference})`);
-                }
-            });
-
-            const title = tr.querySelector('[data-wtb-column="title"]');
-            title.setAttribute('class', 'title-click');
-            title.addEventListener('click', (event) => {
-                displayTodo(id);
-            });
-
-            const completed = tr.querySelector('[data-wtb-column="_completed"]');
-            if (completed && parseInt(completed.textContent)) {
-                input.checked = true;
+            const id = parseInt(id_elem.text());
+            if (cb) {
+                cb.on('change', () => {
+                    if (input.prop('checked')) {
+                        sql_exec(`CALL markCompleted(${id}, ${reference})`);
+                    } else {
+                        sql_exec(`CALL unmarkCompleted(${id}, ${reference})`);
+                    }
+                });
             }
 
-            const isDue = tr.querySelector('[data-wtb-column="_dueNow"]');
-            const isFocus = tr.querySelector('[data-wtb-column="_focus"]');
-            if (isDue && parseInt(isDue.textContent)) {
-                tr.setAttribute('class', 'ui-state-error');
-            } else if (isFocus && parseInt(isFocus.textContent)) {
-                tr.setAttribute('class', 'ui-state-highlight');
+            // Clicking the todo should display it
+            tr.find('[data-wtb-column="title"]').addClass('title-click').on('click', () => displayTodo(id));
+
+            // Check the box if completed
+            const completed = tr.find('[data-wtb-column="_completed"]');
+            if (completed && parseInt(completed.text())) {
+                input.prop('checked', true);
             }
 
-            const hasDetails = tr.querySelector('[data-wtb-column="_hasDetails"]');
-            if (hasDetails && parseInt(hasDetails.textContent)) {
-                const button = document.createElement('button');
-                details.appendChild(button);
-                button.textContent = "...";
+            // Set highlight or error if a "focus" task or due
+            const isDue = tr.find('[data-wtb-column="_dueNow"]');
+            const isFocus = tr.find('[data-wtb-column="_focus"]');
+            if (isDue && parseInt(isDue.text())) {
+                tr.addClass('ui-state-error');
+            } else if (isFocus && parseInt(isFocus.text())) {
+                tr.addClass('ui-state-highlight');
             }
 
-            format_links(tr, 'index.html', links, row, first, column_names);
+            // Add "..." button if appropriate
+            const hasDetails = tr.find('[data-wtb-column="_hasDetails"]');
+            const t = hasDetails.text();
+            if (hasDetails && parseInt(hasDetails.text())) {
+                $('<button>').text('...').appendTo(details);
+            }
+
+            format_links(tr[0], 'index.html', links, row, first, column_names);
 
             if (inbox) {
-                const next = document.createElement('button');
-                tr.appendChild(next);
-                next.textContent = 'Next';
-                next.addEventListener('click', (event) => {
+                // Create "Next" button
+                $('<button>').text('Next').on('click', () => {
                     sql_exec(`CALL markNext(${id})`);
-                });
-                const focus = document.createElement('button');
-                tr.appendChild(focus);
-                focus.textContent = 'Focus';
-                focus.addEventListener('click', (event) => {
+                }).appendTo(tr);
+
+                // Create "Focus" button
+                $('<button>').text('Focus').on('click', () => {
                     sql_exec(`CALL markFocus(${id})`);
-                });
+                }).appendTo(tr);
             }
         }
     }
 
-    return tr;
+    return tr[0];
 }
 
-async function listTasks(proc, params = {show_button: false, activate: true, inbox: false}) {
-    const show_button = !!params.show_button;
-    const activate = (params.activate == undefined) ? true : params.activate;
-    const inbox = !!params.inbox;
-
-    let x = new WTB(proc)
-        .addLink('Edit', 'modifyTodo')
+function listTasks(proc, inbox) {
+    let x = new WTB(proc);
+    return x.addLink('Edit', 'modifyTodo')
         .showHeader()
         .afterResults(() => {
-            $(`#results_${proc} tbody`).sortable({
-                handle: ".handle",
-                axis: 'y',
-                stop: function(event, ui) {
-                    reorderTasks(proc, false);
-                }
-            }).disableSelection();
+            sort_results(proc, false);
         }).rowFormatter((row, first, column_names) => {
             return format_task(inbox, false, x.params.links, row, first, column_names);
         });
-
-    if (!show_button) {
-        x.hideButton();
-    }
-    if (activate) {
-        await x.activate();
-    } else {
-        await x.generate();
-    }
 }
 
 async function weeklyReview() {
-    await listTasks('weeklyReview');
+    await listTasks('weeklyReview', false)
+        .hideButton()
+        .activate();
 }
 
 async function listTasksForProject() {
     const values = WTB.parseQueryString(window.location.search);
     const project = values['listTasksForProject_project'];
-    let a = document.createElement('a');
-    const div = document.querySelector('#wheresthebeef');
-    div.appendChild(a);
-    a.textContent = 'Add Task to Project ';
-    a.setAttribute('href', '?proc=addTaskToProject&addTaskToProject_project='+project);
-    await listTasks('listTasksForProject', {show_button: true});
+    const a = $('<a>').text('Add Task to Project ')
+        .attr('href', '?proc=addTaskToProject&addTaskToProject_project='+project);
+    $('#wheresthebeef').append(a)
+    await listTasks('listTasksForProject', false)
+        .activate();
 }
 async function listFocusTasks() {
-    await listTasks('listFocusTasks', {activate: false});
+    await listTasks('listFocusTasks', false)
+        .hideButton()
+        .activate();
 }
 async function listTodos() {
     await new WTB('listTodos')
@@ -253,13 +229,18 @@ async function listTodos() {
         .activate();
 }
 async function listTasksInState() {
-    await listTasks('listTasksInState', {show_button: true});
+    await listTasks('listTasksInState', false)
+        .activate();
 }
 async function listCompletedTasks() {
-    await listTasks('listCompletedTasks');
+    await listTasks('listCompletedTasks', false)
+        .hideButton()
+        .activate();
 }
 async function listScheduledTasks() {
-    await listTasks('listScheduledTasks');
+    await listTasks('listScheduledTasks', false)
+        .hideButton()
+        .activate();
 }
 
 async function taskTags(prev_proc) {
@@ -363,11 +344,11 @@ async function onLoad() {
         prefillForms();
     } else {
         await new WTB('quickEntry').generate();
-        await listTasks('listInboxTasks', {activate: false, inbox: true});
+        await listTasks('listInboxTasks', true)
+            .hideButton()
+            .activate();
         await listFocusTasks();
         await listTasksInState();
-        WTB.activateProcedure('listInboxTasks');
-        WTB.activateProcedure('listFocusTasks');
     }
 }
         </script>
