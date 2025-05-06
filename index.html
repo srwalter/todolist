@@ -351,6 +351,8 @@ async function onLoad() {
             .activate();
         await listFocusTasks();
         await listTasksInState();
+        const e = WTB.query('quickEntry', 'title');
+        $(e).focus();
     }
 }
         </script>
