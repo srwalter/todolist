@@ -187,11 +187,12 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS listCompletedTasks //
-CREATE PROCEDURE listCompletedTasks ()
+CREATE PROCEDURE listCompletedTasks (paginate_count INT, paginate_offset INT, OUT paginate_total INT)
 BEGIN
     SELECT id AS _id, sort AS _sort, 0 AS _focus, 0 AS _dueNow, hasDetails(details) AS _hasDetails, title, completed,
         1 as _completed
-        FROM todo WHERE completed IS NOT NULL ORDER BY completed DESC;
+        FROM todo WHERE completed IS NOT NULL ORDER BY completed DESC LIMIT paginate_count OFFSET paginate_offset;
+    SELECT COUNT(*) INTO paginate_total FROM todo WHERE completed IS NOT NULL;
 END //
 
 DROP PROCEDURE IF EXISTS listScheduledTasks //
