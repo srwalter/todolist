@@ -26,7 +26,7 @@ function sort_results(proc, reference) {
         handle: ".handle",
         axis: 'y',
         stop: function(event, ui) {
-            reorderTasks(proc, true);
+            reorderTasks(proc, reference);
         }
     }).disableSelection();
 }
